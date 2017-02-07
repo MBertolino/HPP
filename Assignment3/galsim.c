@@ -1,15 +1,9 @@
 #include "file_operations/file_operations.h"
+#include "functions.h"
+#include "structures.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-// Define a particle structure
-typedef struct particle {
-  double x;
-  double y;
-  double m;
-  double vx,
-  double vy,
-} particle_t;
+#include <string.h>
 
 
 int main(int argc, char *argv[]) {
@@ -25,7 +19,7 @@ int main(int argc, char *argv[]) {
   char *filename = argv[2];
   int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
-  int graphics = atoi(argv[5]);
+  //int graphics = atoi(argv[5]);
 	
   /* Constants */
   const double G = 100/(double)N;
@@ -34,11 +28,11 @@ int main(int argc, char *argv[]) {
   /* Read file */
   char *fileDest = "input_data/";
   strcat(fileDest, filename);
-	int flag = read_doubles_from_file(nLines, data, fileDest);
+  double data[N*5];
+	int flag = read_doubles_from_file(N*5, data, fileDest);
   printf("Reading input file: flag = %i\n", flag);
   
   /* Creating the particles */
-	double data[N*5];
   particle_t *particles[N];
   for (short i = 0; i < N; i++) {
     particles[i]->x = data[5*i];
@@ -69,7 +63,7 @@ int main(int argc, char *argv[]) {
   }
   
 	/* Write file */
-	flag = write_doubles_to_file(nLines, data, "output.gal");
+	flag = write_doubles_to_file(N*5, data, "output.gal");
 	printf("Writing output file: flag = %i\n", flag);
   
   // Compare output with ref
