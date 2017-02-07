@@ -21,12 +21,16 @@ int main(int argc, char *argv[]) {
   }
   
   /* Input variables */
-  int N = atoi(argv[1]);
+  short N = (short)atoi(argv[1]);
   char *filename = argv[2];
   int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
   int graphics = atoi(argv[5]);
 	
+  /* Constants */
+  const double G = 100/(double)N;
+  const double epsilon = 0.001;
+  
   /* Read file */
   char *fileDest = "input_data/";
   strcat(fileDest, filename);
@@ -36,7 +40,7 @@ int main(int argc, char *argv[]) {
   /* Creating the particles */
 	double data[N*5];
   particle_t *particles[N];
-  for (int i = 0; i < N; i++) {
+  for (short i = 0; i < N; i++) {
     particles[i]->x = data[5*i];
     particles[i]->y = data[5*i + 1];
     particles[i]->m = data[5*i + 2];
@@ -45,27 +49,30 @@ int main(int argc, char *argv[]) {
   }
   particle_t *particlesPrev[N];
   
-  
-  
-  
-  /*
-  Read data
-  Loop over time
-   - compute acceleration
-   - compute velocity
-   - compute position
-   - (draw graphics)
-  Save output
-  Display results
-  */
+  /* Loop over time */
+  for (short k = 0; k < nsteps; k++) {
+    
+    // Update particles
+    for (short i = 0; i < N; i++) {
+      particles[i] = update(i, G, particlesPrev, N, epsilon, delta_t);
+    }
+    
+    // Update previous particles
+    *particlesPrev = *particles;
+    //for (short j = 0; j < N; j++) {
+    //  particlesPrev[j] = particles[j];
+    //}
+    
+    /*
+    Do graphics.
+    */
+  }
   
 	/* Write file */
-	a = write_doubles_to_file(nLines, data, "output.gal");
-	printf("\na = %i\n", a);
-  
+	flag = write_doubles_to_file(nLines, data, "output.gal");
+	printf("Writing output file: flag = %i\n", flag);
   
   // Compare output with ref
-  
   
 	//free(data);
 	return 0;
