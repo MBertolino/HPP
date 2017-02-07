@@ -1,5 +1,6 @@
-
-// Define a particle structure
+/*
+Define a particle structure
+*/
 typedef struct particle {
   double x;
   double y;
