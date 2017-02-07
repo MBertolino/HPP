@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Define a particle structure
 typedef struct particle {
   double x;
   double y;
@@ -10,30 +11,41 @@ typedef struct particle {
   double vy,
 } particle_t;
 
-int main() {
-	int a;
-  int nParticles = 2;
-	int nLines = nParticles*5;
-	double data[nLines];// = (double*)malloc(nLines*sizeof(double));
+
+int main(int argc, char *argv[]) {
+  
+  /* Check for correct number of input arguments */
+  if (argc != 6) {
+    printf("Error: Expected exactly 5 input arguments.");
+    return -1;
+  }
+  
+  /* Input variables */
+  int N = atoi(argv[1]);
+  char *filename = argv[2];
+  int nsteps = atoi(argv[3]);
+  double delta_t = atof(argv[4]);
+  int graphics = atoi(argv[5]);
 	
   /* Read file */
-	a = read_doubles_from_file(nLines, data, "input_data/circles_N_2.gal");
-	for (int i = 0; i < nLines; i++) {
-		printf("%lf\n", data[i]);
-	}
-  printf("Reading input file: a = %i", a);
+  char *fileDest = "input_data/";
+  strcat(fileDest, filename);
+	int flag = read_doubles_from_file(nLines, data, fileDest);
+  printf("Reading input file: flag = %i\n", flag);
   
-  particle_t *particles[nParticles];
-  for (int i = 0; i < nParticles; i++) {
+  /* Creating the particles */
+	double data[N*5];
+  particle_t *particles[N];
+  for (int i = 0; i < N; i++) {
     particles[i]->x = data[5*i];
     particles[i]->y = data[5*i + 1];
     particles[i]->m = data[5*i + 2];
     particles[i]->vx = data[5*i + 3];
     particles[i]->vy = data[5*i + 4];
   }
+  particle_t *particlesPrev[N];
   
   
-  particle_t *particlesPrev = particles;
   
   
   /*
