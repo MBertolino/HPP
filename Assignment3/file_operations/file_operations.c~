@@ -15,7 +15,7 @@ int read_doubles_from_file(int n, double* p, const char* fileName) {
   fseek(input_file, 0L, SEEK_SET);
   if(fileSize != n * sizeof(double)) {
     printf("read_doubles_from_file error: size of input file '%s' does not match the given n.\n", fileName);
-    printf("For n = %d the file size is expected to be (n * sizeof(double)) = %lu but the actual file size is %lu.\n",
+    printf("For n = %d the file size is expected to be (n * sizeof(double)) = %d but the actual file size is %d.\n",
 	   n, n * sizeof(double), fileSize);
     return -1;
   }
