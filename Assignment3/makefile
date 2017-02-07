@@ -18,4 +18,4 @@ galsim.o: galsim.c file_operations/file_operations.h
 	$(CC) $(CFLAGS) -c galsim.c -std=c99
 
 clean:
-	$(RM) $(EXECUTABLE) $(OBJS) galsim.c~
+	$(RM) $(EXECUTABLE) $(OBJS) makefile~ galsim.c~
