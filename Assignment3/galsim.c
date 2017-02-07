@@ -7,6 +7,20 @@ int main() {
 	int nLines = 10;
 	double* buffer = (double*)malloc(nLines*sizeof(double));
 	
+  
+  /*
+  Read data
+  Loop over time
+   - compute acceleration
+   - compute velocity
+   - compute position
+   - (draw graphics)
+  Save output
+  Display results
+  */
+  
+  
+  
 	/* Read file */
 	a = read_doubles_from_file(nLines, buffer, "input_data/circles_N_2.gal");
 	for (int i = 0; i < nLines; i++) {
