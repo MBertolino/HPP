@@ -2,6 +2,7 @@
 #include "functions.h"
 #include <math.h>
 
+#define NULL 0;
 
 particle_t* update(short i, const double G, particle_t** particles, short N, const double epsilon, double delta_t) {
 	/* Old particle */
