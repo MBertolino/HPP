@@ -7,6 +7,11 @@ void fill_pascal(int** matrix, int n);
 void print_triang(int** matrix, int n);
 
 int main(int argc, char const *argv[]) {
+	if (argc != 2) {
+		printf("Expected exactly 1 input argument\n");
+		return -1;
+	}
+	
 	// Set length of triangle and allocate
 	int n = atoi(argv[1]);
 	int ** tri = allocate_matrix(n);
