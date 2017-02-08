@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
   }
   
 	/* Write file */
-	flag = write_doubles_to_file(N*5, data, "output.gal");
+	flag = write_doubles_to_file(N*5, data, "result.gal");
 	printf("Writing output file: flag = %i\n", flag);
   
   // Compare output with ref
