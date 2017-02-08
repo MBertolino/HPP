@@ -7,9 +7,9 @@
 #define NULL 0;
 #endif
 
-void update(particle_t **particle, short i, const double G, 			particle_t** particles,
-			short N, const double epsilon, 
-			double delta_t) {
+void update(particle_t **particle, short i, const double G,
+            particle_t** particles, short N, const double epsilon,
+            double delta_t) {
   
 	/* Old particle */
 	double xi = (*particle)->x;
