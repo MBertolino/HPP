@@ -54,10 +54,14 @@ int main(int argc, char *argv[]) {
   for (short k = 0; k < nsteps; k++) {
     
     // Update previous particles
-    *particlesPrev = *particles;
-    //for (short j = 0; j < N; j++) {
-    //  particlesPrev[j] = particles[j];
-    //}
+    //*particlesPrev = *particles;
+    for (short j = 1; j <= N; j++) {
+      particlesPrev[j]->x = particles[j]->x;
+      particlesPrev[j]->y = particles[j]->y;
+      particlesPrev[j]->m = particles[j]->m;
+      particlesPrev[j]->vx = particles[j]->vx;
+      particlesPrev[j]->vy = particles[j]->vy;
+    }
     
     // Update particles
     for (short i = 1; i <= N; i++) {
