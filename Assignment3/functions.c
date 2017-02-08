@@ -7,8 +7,9 @@
 #define NULL 0;
 #endif
 
-void update(particle_t **particle, short i, const double G, particle_t** particles,
-                   short N, const double epsilon, double delta_t) {
+void update(particle_t **particle, short i, const double G, 			particle_t** particles,
+			short N, const double epsilon, 
+			double delta_t) {
   
 	/* Old particle */
 	double xi = (*particle)->x;
@@ -21,8 +22,8 @@ void update(particle_t **particle, short i, const double G, particle_t** particl
 	double forceFactor = -G*mi;
 	double acc_x, acc_y;
 	double vxi_new, vyi_new;
-  double rij_x, rij_y, rij, dist;
-  double mass_j;
+ 	double rij_x, rij_y, rij, dist;
+ 	double mass_j;
 	
 	for (short j = 1; j <= N; j++) {
 		if (j == i) continue;
@@ -41,7 +42,7 @@ void update(particle_t **particle, short i, const double G, particle_t** particl
 	acc_x = forceFactor*force_x/mi;
 	acc_y = forceFactor*force_y/mi;
 	
-  /* Calculate velocities */	
+  	/* Calculate velocities */	
 	vxi_new = vxi + delta_t*acc_x;
 	vyi_new = vyi + delta_t*acc_y;
   
