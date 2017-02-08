@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
   const double epsilon = 0.001;
   
   /* Read file */
-  char *fileDest = "input_data/";
+  char fileDest[50];
+  strcpy(fileDest, "input_data/");
   strcat(fileDest, filename);
   double data[N*5];
 	int flag = read_doubles_from_file(N*5, data, fileDest);
@@ -34,13 +35,15 @@ int main(int argc, char *argv[]) {
   
   /* Creating the particles */
   particle_t *particles[N];
-  for (short i = 0; i < N; i++) {
-    particles[i]->x = data[5*i];
-    particles[i]->y = data[5*i + 1];
-    particles[i]->m = data[5*i + 2];
-    particles[i]->vx = data[5*i + 3];
-    particles[i]->vy = data[5*i + 4];
+  for (short i = 1; i <= N; i++) {
+    particles[i] = (particle_t*)malloc(sizeof(particle_t));
+    particles[i]->x = data[5*(i-1)];
+    particles[i]->y = data[5*(i-1) + 1];
+    particles[i]->m = data[5*(i-1) + 2];
+    particles[i]->vx = data[5*(i-1) + 3];
+    particles[i]->vy = data[5*(i-1) + 4];
   }
+  
   particle_t *particlesPrev[N];
   
   /* Loop over time */
