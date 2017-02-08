@@ -10,7 +10,7 @@ EXECUTABLE = galsim
 all:$(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) -o $(EXECUTABLE) $(LDFLAGS)
+	$(LD) -o $(EXECUTABLE) $(OBJS) $(LDFLAGS)
 
 file_operations.o: file_operations/file_operations.h file_operations/file_operations.c
 	$(CC) $(CFLAGS) -c file_operations/file_operations.c

@@ -1,10 +1,13 @@
 #include "file_operations/file_operations.h"
+#include "graphics/graphics.h"
 #include "structures.h"
 #include "functions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h> // Sleep function
 
+const int windowWidth = 800;
 
 int main(int argc, char *argv[]) {
   
@@ -13,6 +16,9 @@ int main(int argc, char *argv[]) {
     printf("Error: Expected exactly 5 input arguments.");
     return -1;
   }
+  
+  /* Setup graphics */
+  InitializeGraphics(argv[0], windowWidth, windowWidth);
   
   /* Input variables */
   short N = (short)atoi(argv[1]);
@@ -30,7 +36,7 @@ int main(int argc, char *argv[]) {
   strcpy(fileDest, "input_data/");
   strcat(fileDest, filename);
   double data[N*5];
-	int flag = read_doubles_from_file(N*5, data, fileDest);
+  int flag = read_doubles_from_file(N*5, data, fileDest);
   printf("Reading input file: flag = %i\n", flag);
   
   /* Creating the particles */
@@ -52,8 +58,8 @@ int main(int argc, char *argv[]) {
   
   /* Loop over time */
   for (short k = 0; k < nsteps; k++) {
-    
-    // Update previous particles
+     
+    /* Update previous particles */
     //*particlesPrev = *particles;
     for (short j = 1; j <= N; j++) {
       particlesPrev[j]->x = particles[j]->x;
@@ -63,22 +69,26 @@ int main(int argc, char *argv[]) {
       particlesPrev[j]->vy = particles[j]->vy;
     }
     
-    // Update particles
+    /* Update particles */
     for (short i = 1; i <= N; i++) {
       update(&particles[i], i, G, particlesPrev, N, epsilon, delta_t);
     }
     
-    /*
-    Do graphics.
-    */
+    /* Do graphics. */
+    Refresh();
+    sleep(1);
   }
   
-	/* Write file */
-	flag = write_doubles_to_file(N*5, data, "result.gal");
-	printf("Writing output file: flag = %i\n", flag);
+  /* Close graphics */
+  FlushDisplay();
+  CloseDisplay();
   
-  // Compare output with ref
+  /* Write file */
+  flag = write_doubles_to_file(N*5, data, "result.gal");
+  printf("Writing output file: flag = %i\n", flag);
   
-	//free(data);
-	return 0;
+  /* Compare output with ref */
+  
+  //free(data);
+  return 0;
 }
