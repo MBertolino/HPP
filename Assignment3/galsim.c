@@ -44,21 +44,25 @@ int main(int argc, char *argv[]) {
     particles[i]->vy = data[5*(i-1) + 4];
   }
   
+  /* Create an array for the previous particle states */
   particle_t *particlesPrev[N];
+  for (short i = 1; i <= N; i++) {
+    particlesPrev[i] = (particle_t*)malloc(sizeof(particle_t));
+  }
   
   /* Loop over time */
   for (short k = 0; k < nsteps; k++) {
-    
-    // Update particles
-    for (short i = 0; i < N; i++) {
-      particles[i] = update(i, G, particlesPrev, N, epsilon, delta_t);
-    }
     
     // Update previous particles
     *particlesPrev = *particles;
     //for (short j = 0; j < N; j++) {
     //  particlesPrev[j] = particles[j];
     //}
+    
+    // Update particles
+    for (short i = 1; i <= N; i++) {
+      update(&particles[i], i, G, particlesPrev, N, epsilon, delta_t);
+    }
     
     /*
     Do graphics.
