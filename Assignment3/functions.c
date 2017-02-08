@@ -1,27 +1,29 @@
 #include "structures.h"
 #include "functions.h"
+#include <math.h>
 
 
-particle_t update(short i, const double G, particle_t** particles, short N, const double epsilon, double delta_t) {
+particle_t* update(short i, const double G, particle_t** particles, short N, const double epsilon, double delta_t) {
 	/* Old particle */
 	particle_t *particle_i = particles[i];
-	xi = particle_i->x;
-	yi = particle_i->y;
-	mi = particel_i->m;
-	vxi = particle_i->vx;
-	vyi = particle_i->vy;
+	double xi = particle_i->x;
+	double yi = particle_i->y;
+	double mi = particle_i->m;
+	double vxi = particle_i->vx;
+	double vyi = particle_i->vy;
 	
 	/* New particle */
-	particle_t *particle_i_new;
+	particle_t *particle_i_new = NULL;
 	
 	/* Other particle */
-	particle_t *partj;
+	particle_t *partj = NULL;
 	
 	double force_x, force_y;
 	double forceFactor = -G*mi;
 	double acc_x, acc_y;
-	double vxi_new, xyi_new;
-	double xi_new, yi_new;
+	double vxi_new, vyi_new;
+  double rij_x, rij_y, rij, dist;
+  double mass_j;
 	
 	for (short j = 0; j < N; j++) {
 		if (j == i) continue;
