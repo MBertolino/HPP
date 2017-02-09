@@ -49,20 +49,20 @@ int main(int argc, char *argv[]) {
   
   /* Creating the particles */
   //particle_t **particles = (particle_t**)malloc(sizeof(particle_t*));
-  particle_t *particles[N];
-  for (short i = 0; i < N; i++) {
+  particle_t *particles[N+1];
+  for (short i = 1; i <= N; i++) {
     particles[i] = (particle_t*)malloc(sizeof(particle_t));
-    particles[i]->x = data[5*(i)];
-    particles[i]->y = data[5*(i) + 1];
-    particles[i]->m = data[5*(i) + 2];
-    particles[i]->vx = data[5*(i) + 3];
-    particles[i]->vy = data[5*(i) + 4];
+    particles[i]->x = data[5*(i-1) + 0];
+    particles[i]->y = data[5*(i-1) + 1];
+    particles[i]->m = data[5*(i-1) + 2];
+    particles[i]->vx = data[5*(i-1) + 3];
+    particles[i]->vy = data[5*(i-1) + 4];
   }
   
   /* Create an array for the previous particle states */
   //particle_t **particlesPrev = (particle_t**)malloc(sizeof(particle_t*));
-  particle_t *particlesPrev[N];
-  for (short i = 0; i < N; i++) {
+  particle_t *particlesPrev[N+1];
+  for (short i = 1; i <= N; i++) {
     particlesPrev[i] = (particle_t*)malloc(sizeof(particle_t));
   }
   
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
   for (short k = 0; k < nsteps; k++) {
      
     /* Update previous particles */
-    for (short j = 0; j < N; j++) {
-      particlesPrev[j] = particles[j];
+    for (short i = 1; i <= N; j++) {
+      particlesPrev[i] = particles[i];
       /*
       particlesPrev[j]->x = particles[j]->x;
       particlesPrev[j]->y = particles[j]->y;
@@ -82,14 +82,14 @@ int main(int argc, char *argv[]) {
     }
         
     /* Update particles */
-    for (short i = 0; i < N; i++) {
+    for (short i = 1; i < N; i++) {
       update(&particles[i], i, G, particlesPrev, N, epsilon, delta_t);
     }
     
     /* Do graphics. */
     if (graphics) {
       ClearScreen();
-      for (short i = 0; i < N; i++) {
+      for (short i = 1; i <= N; i++) {
         DrawCircle(particles[i]->x, particles[i]->y, L, W, radius, circleColor);
       }
       Refresh();
@@ -105,12 +105,12 @@ int main(int argc, char *argv[]) {
   
   /* Write file */
   double outdata[N*5];
-  for (int i = 0; i < N; i++) {
-    outdata[5*(i) + 0] = particles[i]->x;
-    outdata[5*(i) + 1] = particles[i]->y;
-    outdata[5*(i) + 2] = particles[i]->m;
-    outdata[5*(i) + 3] = particles[i]->vx;
-    outdata[5*(i) + 4] = particles[i]->vy;
+  for (int i = 1; i <= N; i++) {
+    outdata[5*(i-1) + 0] = particles[i]->x;
+    outdata[5*(i-1) + 1] = particles[i]->y;
+    outdata[5*(i-1) + 2] = particles[i]->m;
+    outdata[5*(i-1) + 3] = particles[i]->vx;
+    outdata[5*(i-1) + 4] = particles[i]->vy;
   }
   flag = write_doubles_to_file(N*5, outdata, "result.gal");
   printf("Writing output file: flag = %i\n", flag);
