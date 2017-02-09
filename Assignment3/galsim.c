@@ -88,6 +88,8 @@ int main(int argc, char *argv[]) {
       vyi = dataPrev[5*i + 4];
       
       /* Compute each particle contribution */
+      force_x = 0;
+      force_y = 0;
       for (short j = 0; j < N; j++) {
         if (j == i) continue;
         
