@@ -7,15 +7,15 @@
 #define NULL 0;
 #endif
 
-void update(particle_t *particle, short i, const double G,
+void update(particle_t **particle, short i, const double G,
             particle_t **particles, short N, const double epsilon,
             double delta_t) {
   
 	/* Old particle */
-	double xi = (particle)->x;
-	double yi = (particle)->y;
-	double vxi = (particle)->vx;
-	double vyi = (particle)->vy;
+	double xi = (*particle)->x;
+	double yi = (*particle)->y;
+	double vxi = (*particle)->vx;
+	double vyi = (*particle)->vy;
 	
 	double force_x, force_y;
 	double acc_x, acc_y;
@@ -44,11 +44,11 @@ void update(particle_t *particle, short i, const double G,
 	vyi += delta_t*acc_y;
   
 	/* Update velocities */	
-	(particle)->vx = vxi;
-	(particle)->vy = vyi;
-		
+	(*particle)->vx = vxi;
+	(*particle)->vy = vyi;
+	
 	/* Update positions */
-	(particle)->x = xi + delta_t*vxi;
-	(particle)->y = yi + delta_t*vyi;
+	(*particle)->x = xi + delta_t*vxi;
+	(*particle)->y = yi + delta_t*vyi;
 }
 

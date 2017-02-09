@@ -51,6 +51,9 @@ int main(int argc, char *argv[]) {
   /* Creating the particles */
   particle_t **particles = (particle_t**)malloc(N*sizeof(particle_t*));
   //particle_t *particles[N];
+  
+  printf("\nInput data:\n");
+  
   for (short i = 0; i < N; i++) {
     particles[i] = (particle_t*)malloc(sizeof(particle_t));
     particles[i]->x = data[5*i];
@@ -58,6 +61,8 @@ int main(int argc, char *argv[]) {
     particles[i]->m = data[5*i + 2];
     particles[i]->vx = data[5*i + 3];
     particles[i]->vy = data[5*i + 4];
+    printf("%lf\t%lf\t%lf\t%lf\t%lf\n", particles[i]->x, particles[i]->y,
+           particles[i]->m, particles[i]->vx, particles[i]->vy);
   }
   
   /* Create an array for the previous particle states */
@@ -69,8 +74,7 @@ int main(int argc, char *argv[]) {
   
   /* Loop over time */
   for (short k = 0; k < nsteps; k++) {
-    printf("%d\n", k);
-     
+    
     /* Update previous particles */
     for (short j = 0; j < N; j++) {
       particlesPrev[j]->x = particles[j]->x;
@@ -79,10 +83,13 @@ int main(int argc, char *argv[]) {
       particlesPrev[j]->vx = particles[j]->vx;
       particlesPrev[j]->vy = particles[j]->vy;
     }
-        
+    
+    /* Doesnt work without this line */
+    printf(" ");
+    
     /* Update particles */
     for (short i = 0; i < N; i++) {
-      update((particles[i]), i, G, particlesPrev, N, epsilon, delta_t);
+      update(&(particles[i]), i, G, particlesPrev, N, epsilon, delta_t);
     }
     
     /* Do graphics. */
@@ -104,15 +111,20 @@ int main(int argc, char *argv[]) {
   
   /* Write file */
   double outdata[N*5];
+  
+  printf("\nOutput data:\n");
+  
   for (int i = 0; i < N; i++) {
     outdata[5*i] = particles[i]->x;
     outdata[5*i + 1] = particles[i]->y;
     outdata[5*i + 2] = particles[i]->m;
     outdata[5*i + 3] = particles[i]->vx;
     outdata[5*i + 4] = particles[i]->vy;
+    printf("%lf\t%lf\t%lf\t%lf\t%lf\n", particles[i]->x, particles[i]->y,
+           particles[i]->m, particles[i]->vx, particles[i]->vy);
   }
   flag = write_doubles_to_file(N*5, outdata, "result.gal");
-  printf("Writing output file: flag = %i\n", flag);
+  printf("\nWriting output file: flag = %i\n", flag);
   
   /* Free memory */
   for (int i = 0; i < N; i++) {
