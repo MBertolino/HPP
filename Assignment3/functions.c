@@ -14,7 +14,6 @@ void update(particle_t **particle, short i, const double G,
 	/* Old particle */
 	double xi = (*particle)->x;
 	double yi = (*particle)->y;
-	double mi = (*particle)->m;
 	double vxi = (*particle)->vx;
 	double vyi = (*particle)->vy;
 	
