@@ -80,6 +80,11 @@ int main(int argc, char *argv[]) {
       dataTemp = update(data[5*i], data[5*i + 1], data[5*i + 2],
                         data[5*i + 3], data[5*i + 4], dataPrev,
                         i, N, G, epsilon, delta_t);
+      data[5*i] = dataTemp[0];
+      data[5*i + 1] = dataTemp[1];
+      data[5*i + 2] = dataTemp[2];
+      data[5*i + 3] = dataTemp[3];
+      data[5*i + 4] = dataTemp[4];
     }
     
     /* Do graphics. */
@@ -112,7 +117,7 @@ int main(int argc, char *argv[]) {
   printf("\n\n");
   
   /* Write result file */
-  flag = write_doubles_to_file(N*5, outdata, "result.gal");
+  flag = write_doubles_to_file(N*5, data, "result.gal");
   printf("\nWriting output file: flag = %i\n", flag);
   
   /* Free memory */
