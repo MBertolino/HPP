@@ -2,10 +2,10 @@
 
 #include "file_operations/file_operations.h"
 #include "graphics/graphics.h"
-#include "functions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h> // Sleep function
 
 const int windowWidth = 800;
@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
   /* Display input data */
   printf("\nInput data:\n");
   double x, y, m, vx, vy;
+  
   for (short i = 0; i < N; i++) {
     x = data[5*i];
     y = data[5*i + 1];
@@ -62,8 +63,14 @@ int main(int argc, char *argv[]) {
   /* Create an array for the previous data */
   double *dataPrev = (double*)malloc(N*5*sizeof(double));
   
+  /* Define temporary variables */
+  double xi, yi, vxi, vyi;
+  double force_x, force_y;
+	double acc_x, acc_y;
+ 	double rij_x, rij_y, rij, dist;
+ 	double mass_j;
+  
   /* Loop over time */
-  double *dataTemp;
   for (short k = 0; k < nsteps; k++) {
     
     /* Update previous data */
@@ -71,19 +78,45 @@ int main(int argc, char *argv[]) {
       dataPrev[i] = data[i];
     }
     
-    /* Doesn't work without this line */
-    printf(" ");
-    
     /* Update particles */
     for (short i = 0; i < N; i++) {
-      dataTemp = update(data[5*i], data[5*i + 1], data[5*i + 2],
-                        data[5*i + 3], data[5*i + 4], dataPrev,
-                        i, N, G, epsilon, delta_t);
-      data[5*i] = dataTemp[0];
-      data[5*i + 1] = dataTemp[1];
-      data[5*i + 2] = dataTemp[2];
-      data[5*i + 3] = dataTemp[3];
-      data[5*i + 4] = dataTemp[4];
+      
+      /* Position and velocity */
+      xi = dataPrev[5*i];
+      yi = dataPrev[5*i + 1];
+      vxi = dataPrev[5*i + 3];
+      vyi = dataPrev[5*i + 4];
+      
+      /* Compute each particle contribution */
+      for (short j = 0; j < N; j++) {
+        if (j == i) continue;
+        
+        rij_x = xi - dataPrev[5*j];
+        rij_y = yi - dataPrev[5*j + 1];
+        rij = sqrt(rij_x*rij_x + rij_y*rij_y);
+        dist = rij + epsilon;
+        
+        /* Calculate forces */
+        mass_j = dataPrev[5*j + 2];
+        force_x += (mass_j)/(dist*dist*dist)*rij_x;
+        force_y += (mass_j)/(dist*dist*dist)*rij_y;
+      }
+      
+      /* Calculate accelerations */
+      acc_x = -G*force_x;
+      acc_y = -G*force_y;
+      
+      /* Calculate velocities */	
+      vxi += delta_t*acc_x;
+      vyi += delta_t*acc_y;
+      
+      /* Update velocities */	
+      data[5*i + 3] = vxi;
+      data[5*i + 4] = vyi;
+      
+      /* Update positions and mass */
+      data[5*i] = xi + delta_t*vxi;
+      data[5*i + 1] = yi + delta_t*vyi;
     }
     
     /* Do graphics. */
