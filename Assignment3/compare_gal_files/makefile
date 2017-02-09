@@ -1,7 +1,7 @@
 CC = gcc
 LD = gcc
 CFLAGS = -Wall -Werror
-LDFLAGS = 
+LDFLAGS = -lm
 RM = /bin/rm -f
 OBJS = compare_gal_files.o file_operations.o
 EXECUTABLE = compare
@@ -9,7 +9,7 @@ EXECUTABLE = compare
 all:$(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) -o $(EXECUTABLE)
+	$(LD) $(OBJS) -o $(EXECUTABLE) $(LDFLAGS)
 
 file_operations.o: ../file_operations/file_operations.h ../file_operations/file_operations.c
 	$(CC) $(CFLAGS) -c ../file_operations/file_operations.c
