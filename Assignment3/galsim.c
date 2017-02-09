@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     }
         
     /* Update particles */
-    for (short i = 1; i < N; i++) {
+    for (short i = 1; i <= N; i++) {
       update(&particles[i], i, G, particlesPrev, N, epsilon, delta_t);
     }
     

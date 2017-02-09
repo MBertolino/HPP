@@ -42,7 +42,7 @@ void update(particle_t **particle, short i, const double G,
 	acc_x = forceFactor*force_x/mi;
 	acc_y = forceFactor*force_y/mi;
 	
-  	/* Calculate velocities */	
+  /* Calculate velocities */	
 	vxi_new = vxi + delta_t*acc_x;
 	vyi_new = vyi + delta_t*acc_y;
   
