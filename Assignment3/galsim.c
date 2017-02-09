@@ -1,3 +1,5 @@
+#define _BSD_SOURCE
+
 #include "file_operations/file_operations.h"
 #include "graphics/graphics.h"
 #include "structures.h"
@@ -16,17 +18,21 @@ int main(int argc, char *argv[]) {
     printf("Error: Expected exactly 5 input arguments.");
     return -1;
   }
-  
-  /* Setup graphics */
-  InitializeGraphics(argv[0], windowWidth, windowWidth);
-  
+    
   /* Input variables */
   short N = (short)atoi(argv[1]);
   char *filename = argv[2];
   int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
   //int graphics = atoi(argv[5]);
-	
+  
+  /* Setup graphics */
+  InitializeGraphics(argv[5], windowWidth, windowWidth);
+  float L = 1;
+  float W = 1;
+  float radius = 0.01*L;
+  float circleColor = 0;
+  
   /* Constants */
   const double G = 100/(double)N;
   const double epsilon = 0.001;
@@ -68,16 +74,20 @@ int main(int argc, char *argv[]) {
       particlesPrev[j]->vx = particles[j]->vx;
       particlesPrev[j]->vy = particles[j]->vy;
     }
-    
+        
     /* Update particles */
+    ClearScreen();
     for (short i = 1; i <= N; i++) {
       update(&particles[i], i, G, particlesPrev, N, epsilon, delta_t);
+      DrawCircle(particles[i]->x, particles[i]->y, L, W, radius, circleColor);
     }
     
     /* Do graphics. */
     Refresh();
-    sleep(1);
+    usleep(10);
   }
+  
+  //while(1){}
   
   /* Close graphics */
   FlushDisplay();
