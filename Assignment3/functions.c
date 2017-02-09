@@ -22,7 +22,7 @@ void update(particle_t **particle, short i, const double G,
  	double rij_x, rij_y, rij, dist;
  	double mass_j;
 
-	for (short j = 1; j <= N; j++) {
+	for (short j = 0; j < N; j++) {
 		if (j == i) continue;
 		rij_x = xi - particles[j]->x;
 		rij_y = yi - particles[j]->y;
