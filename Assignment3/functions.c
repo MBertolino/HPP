@@ -19,9 +19,7 @@ void update(particle_t **particle, short i, const double G,
 	double vyi = (*particle)->vy;
 	
 	double force_x, force_y;
-	double forceFactor = -G*mi;
 	double acc_x, acc_y;
-	double vxi_new, vyi_new;
  	double rij_x, rij_y, rij, dist;
  	double mass_j;
 
@@ -39,19 +37,19 @@ void update(particle_t **particle, short i, const double G,
 	}
   
 	/* Calculate accelerations */
-	acc_x = forceFactor*force_x/mi;
-	acc_y = forceFactor*force_y/mi;
+	acc_x = -G*force_x;
+	acc_y = -G*force_y;
 	
-  /* Calculate velocities */	
-	vxi_new = vxi + delta_t*acc_x;
-	vyi_new = vyi + delta_t*acc_y;
+    /* Calculate velocities */	
+	vxi += delta_t*acc_x;
+	vyi += delta_t*acc_y;
   
 	/* Update velocities */	
-	(*particle)->vx = vxi_new;
-	(*particle)->vy = vyi_new;
+	(*particle)->vx = vxi;
+	(*particle)->vy = vyi;
 		
 	/* Update positions */
-	(*particle)->x = xi + delta_t*vxi_new;
-	(*particle)->y = yi + delta_t*vyi_new;
+	(*particle)->x = xi + delta_t*vxi;
+	(*particle)->y = yi + delta_t*vyi;
 }
 
