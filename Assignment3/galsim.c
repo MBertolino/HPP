@@ -52,11 +52,11 @@ int main(int argc, char *argv[]) {
   //particle_t *particles[N];
   for (short i = 0; i < N; i++) {
     particles[i] = (particle_t*)malloc(sizeof(particle_t));
-    particles[i]->x = data[5*(i) + 0];
-    particles[i]->y = data[5*(i) + 1];
-    particles[i]->m = data[5*(i) + 2];
-    particles[i]->vx = data[5*(i) + 3];
-    particles[i]->vy = data[5*(i) + 4];
+    particles[i]->x = data[5*i + 0];
+    particles[i]->y = data[5*i + 1];
+    particles[i]->m = data[5*i + 2];
+    particles[i]->vx = data[5*i + 3];
+    particles[i]->vy = data[5*i + 4];
   }
   
   /* Create an array for the previous particle states */
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
   
   /* Loop over time */
   for (short k = 0; k < nsteps; k++) {
-    printf("Timestep %d", k);
+    printf("%d\n", k);
      
     /* Update previous particles */
     for (short j = 0; j < N; j++) {
@@ -104,11 +104,11 @@ int main(int argc, char *argv[]) {
   /* Write file */
   double outdata[N*5];
   for (int i = 0; i < N; i++) {
-    outdata[5*(i) + 0] = particles[i]->x;
-    outdata[5*(i) + 1] = particles[i]->y;
-    outdata[5*(i) + 2] = particles[i]->m;
-    outdata[5*(i) + 3] = particles[i]->vx;
-    outdata[5*(i) + 4] = particles[i]->vy;
+    outdata[5*i] = particles[i]->x;
+    outdata[5*i + 1] = particles[i]->y;
+    outdata[5*i + 2] = particles[i]->m;
+    outdata[5*i + 3] = particles[i]->vx;
+    outdata[5*i + 4] = particles[i]->vy;
   }
   flag = write_doubles_to_file(N*5, outdata, "result.gal");
   printf("Writing output file: flag = %i\n", flag);
