@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
     vy = data[5*i + 4];
     printf("%lf\t%lf\t%lf\t%lf\t%lf\n", x, y, m, vx, vy);
   }
-  printf("\n\n");
   
   /* Create an array for the previous data */
   double *dataPrev = (double*)malloc(N*5*sizeof(double));
@@ -72,7 +71,7 @@ int main(int argc, char *argv[]) {
       dataPrev[i] = data[i];
     }
     
-    /* Doesnt work without this line */
+    /* Doesn't work without this line */
     printf(" ");
     
     /* Update particles */
@@ -105,7 +104,7 @@ int main(int argc, char *argv[]) {
   }
   
   /* Display output data */
-  printf("\nOutput data:\n");
+  printf("\n\nOutput data:\n");
   for (short i = 0; i < N; i++) {
     x = data[5*i];
     y = data[5*i + 1];
