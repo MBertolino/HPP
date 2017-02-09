@@ -24,10 +24,11 @@ int main(int argc, char *argv[]) {
   char *filename = argv[2];
   int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
-  //int graphics = atoi(argv[5]);
+  const int graphics = atoi(argv[5]);
   
   /* Setup graphics */
-  InitializeGraphics(argv[5], windowWidth, windowWidth);
+  if (graphics)
+    InitializeGraphics(argv[5], windowWidth, windowWidth);
   float L = 1;
   float W = 1;
   float radius = 0.01*L;
@@ -76,29 +77,46 @@ int main(int argc, char *argv[]) {
     }
         
     /* Update particles */
-    ClearScreen();
     for (short i = 1; i <= N; i++) {
       update(&particles[i], i, G, particlesPrev, N, epsilon, delta_t);
-      DrawCircle(particles[i]->x, particles[i]->y, L, W, radius, circleColor);
     }
     
     /* Do graphics. */
-    Refresh();
-    usleep(10);
+    if (graphics) {
+      ClearScreen();
+      for (short i = 1; i <= N; i++) {
+        DrawCircle(particles[i]->x, particles[i]->y, L, W, radius, circleColor);
+      }
+      Refresh();
+      usleep(10);
+    }
   }
   
   //while(1){}
   
   /* Close graphics */
-  FlushDisplay();
-  CloseDisplay();
+  if (graphics) {
+    FlushDisplay();
+    CloseDisplay();
+  }
   
   /* Write file */
-  flag = write_doubles_to_file(N*5, data, "result.gal");
+  double outdata[N*5];
+  for (int i = 1; i <= N; i++) {
+    outdata[5*(i-1) + 0] = particles[i]->x;
+    outdata[5*(i-1) + 1] = particles[i]->y;
+    outdata[5*(i-1) + 2] = particles[i]->m;
+    outdata[5*(i-1) + 3] = particles[i]->vx;
+    outdata[5*(i-1) + 4] = particles[i]->vy;
+  }
+  flag = write_doubles_to_file(N*5, outdata, "result.gal");
   printf("Writing output file: flag = %i\n", flag);
   
-  /* Compare output with ref */
+  /* Free memory */
+  for (int i = 1; i <= N; i++) {
+    free(particles[i]);
+    free(particlesPrev[i]);
+  }
   
-  //free(data);
   return 0;
 }
