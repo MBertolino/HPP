@@ -2,5 +2,7 @@
 Comments comments comments
 */
 
-void update(particle_t **particle, short i, const double G, particle_t** particles, short N, const double epsilon, double delta_t);
+double* update(double xi, double yi, double mi, double vxi, double vyi, double *dataPrev,
+            short i, short N, const double G, const double epsilon,
+            double delta_t);
 
