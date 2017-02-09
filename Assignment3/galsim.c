@@ -115,8 +115,8 @@ int main(int argc, char *argv[]) {
   
   /* Free memory */
   for (int i = 0; i < N; i++) {
-    free(*particles[i]);
-    free(*particlesPrev[i]);
+    free(particles[i]);
+    free(particlesPrev[i]);
   } //*/
   
   return 0;
