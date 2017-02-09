@@ -1,4 +1,3 @@
-#include "structures.h"
 #include "functions.h"
 #include <math.h>
 #include <stdlib.h>
@@ -7,30 +6,26 @@
 #define NULL 0;
 #endif
 
-void update(particle_t **particle, short i, const double G,
-            particle_t **particles, short N, const double epsilon,
+double* update(double xi, double yi, double mi, double vxi, double vyi, double *dataPrev,
+            short i, short N, const double G, const double epsilon,
             double delta_t) {
   
 	/* Old particle */
-	double xi = (*particle)->x;
-	double yi = (*particle)->y;
-	double vxi = (*particle)->vx;
-	double vyi = (*particle)->vy;
-	
 	double force_x, force_y;
 	double acc_x, acc_y;
  	double rij_x, rij_y, rij, dist;
  	double mass_j;
+ 	static double data[5];
 
 	for (short j = 0; j < N; j++) {
 		if (j == i) continue;
-		rij_x = xi - particles[j]->x;
-		rij_y = yi - particles[j]->y;
+		rij_x = xi - dataPrev[5*j];
+		rij_y = yi - dataPrev[5*j + 1];
 		rij = sqrt(rij_x*rij_x + rij_y*rij_y);
 		dist = rij + epsilon;
 		
 		/* Calculate forces */
-		mass_j = particles[j]->m;
+		mass_j = dataPrev[5*j + 2];
 		force_x += (mass_j)/(dist*dist*dist)*rij_x;
 		force_y += (mass_j)/(dist*dist*dist)*rij_y;
 	}
@@ -44,11 +39,13 @@ void update(particle_t **particle, short i, const double G,
 	vyi += delta_t*acc_y;
   
 	/* Update velocities */	
-	(*particle)->vx = vxi;
-	(*particle)->vy = vyi;
+	data[3] = vxi;
+	data[4] = vyi;
 	
 	/* Update positions */
-	(*particle)->x = xi + delta_t*vxi;
-	(*particle)->y = yi + delta_t*vyi;
+	data[0] = xi + delta_t*vxi;
+	data[1] = yi + delta_t*vyi;
+	data[2] = mi;
+	
+	return data;
 }
-
