@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
   
   /* Loop over time */
   for (short k = 0; k < nsteps; k++) {
+    printf("Timestep %d", k);
      
     /* Update previous particles */
     for (short j = 0; j < N; j++) {
@@ -114,8 +115,8 @@ int main(int argc, char *argv[]) {
   
   /* Free memory */
   for (int i = 0; i < N; i++) {
-    free(particles[i]);
-    free(particlesPrev[i]);
+    free(*particles[i]);
+    free(*particlesPrev[i]);
   } //*/
   
   return 0;
