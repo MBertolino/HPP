@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
   
   /* Creating the particles */
   //particle_t **particles = (particle_t**)malloc(sizeof(particle_t*));
-  particle_t *particles[N+1];
+  particle_t *particles[N];
   for (short i = 0; i < N; i++) {
     particles[i] = (particle_t*)malloc(sizeof(particle_t));
     particles[i]->x = data[5*(i) + 0];
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
   
   /* Create an array for the previous particle states */
   //particle_t **particlesPrev = (particle_t**)malloc(sizeof(particle_t*));
-  particle_t *particlesPrev[N+1];
+  particle_t *particlesPrev[N];
   for (short i = 0; i < N; i++) {
     particlesPrev[i] = (particle_t*)malloc(sizeof(particle_t));
   }
