@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
   printf("Reading input file: flag = %i\n", flag);
   
   /* Creating the particles */
-  //particle_t **particles = (particle_t**)malloc(sizeof(particle_t*));
-  particle_t *particles[N];
+  particle_t **particles = (particle_t**)malloc(N*sizeof(particle_t*));
+  //particle_t *particles[N];
   for (short i = 0; i < N; i++) {
     particles[i] = (particle_t*)malloc(sizeof(particle_t));
     particles[i]->x = data[5*(i) + 0];
@@ -60,8 +60,8 @@ int main(int argc, char *argv[]) {
   }
   
   /* Create an array for the previous particle states */
-  //particle_t **particlesPrev = (particle_t**)malloc(sizeof(particle_t*));
-  particle_t *particlesPrev[N];
+  particle_t **particlesPrev = (particle_t**)malloc(N*sizeof(particle_t*));
+  //particle_t *particlesPrev[N];
   for (short i = 0; i < N; i++) {
     particlesPrev[i] = (particle_t*)malloc(sizeof(particle_t));
   }
@@ -71,7 +71,6 @@ int main(int argc, char *argv[]) {
      
     /* Update previous particles */
     for (short j = 0; j < N; j++) {
-      //particlesPrev[j] = particles[j];
       particlesPrev[j]->x = particles[j]->x;
       particlesPrev[j]->y = particles[j]->y;
       particlesPrev[j]->m = particles[j]->m;
