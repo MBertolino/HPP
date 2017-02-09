@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
   /* Setup graphics */
   if (graphics)
     InitializeGraphics(argv[5], windowWidth, windowWidth);
+    SetCAxes(0,1);
   float L = 1;
   float W = 1;
   float radius = 0.01*L;
