@@ -41,7 +41,7 @@ double* update(double xi, double yi, double mi, double vxi, double vyi, double *
 	/* Update velocities */	
 	data[3] = vxi;
 	data[4] = vyi;
-	
+  
 	/* Update positions */
 	data[0] = xi + delta_t*vxi;
 	data[1] = yi + delta_t*vyi;
