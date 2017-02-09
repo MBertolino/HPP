@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
   for (short k = 0; k < nsteps; k++) {
      
     /* Update previous particles */
-    for (short i = 1; i <= N; j++) {
-      particlesPrev[i] = particles[i];
+    for (short j = 1; j <= N; j++) {
+      particlesPrev[j] = particles[j];
       /*
       particlesPrev[j]->x = particles[j]->x;
       particlesPrev[j]->y = particles[j]->y;
