@@ -44,19 +44,7 @@ int main(int argc, char *argv[]) {
   strcpy(fileDest, "input_data/");
   strcat(fileDest, filename);
   double *data = (double*)malloc(N*5*sizeof(double));
-  int flag = read_doubles_from_file(N*5, data, fileDest);
-  printf("Reading input file: flag = %i\n", flag);
-  
-  /* Display input data */
-  double x, y, m, vx, vy;
-  
-  for (short i = 0; i < N; i++) {
-    x = data[5*i];
-    y = data[5*i + 1];
-    m = data[5*i + 2];
-    vx = data[5*i + 3];
-    vy = data[5*i + 4];
-  }
+  read_doubles_from_file(N*5, data, fileDest);
   
   /* Create an array for the previous data */
   double *dataPrev = (double*)malloc(N*5*sizeof(double));
@@ -135,20 +123,9 @@ int main(int argc, char *argv[]) {
     FlushDisplay();
     CloseDisplay();
   }
-  
-  /* Display output data */
-  for (short i = 0; i < N; i++) {
-    x = data[5*i];
-    y = data[5*i + 1];
-    m = data[5*i + 2];
-    vx = data[5*i + 3];
-    vy = data[5*i + 4];
-  }
-  printf("\n\n");
-  
+    
   /* Write result file */
-  flag = write_doubles_to_file(N*5, data, "result.gal");
-  printf("\nWriting output file: flag = %i\n", flag);
+  write_doubles_to_file(N*5, data, "result.gal");
   
   /* Free memory */
   free(data);
