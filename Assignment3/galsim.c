@@ -27,9 +27,10 @@ int main(int argc, char *argv[]) {
   const int graphics = atoi(argv[5]);
   
   /* Setup graphics */
-  if (graphics)
+  if (graphics) {
     InitializeGraphics(argv[5], windowWidth, windowWidth);
     SetCAxes(0,1);
+  }
   float L = 1;
   float W = 1;
   float radius = 0.01*L;
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
   //particle_t *particles[N];
   for (short i = 0; i < N; i++) {
     particles[i] = (particle_t*)malloc(sizeof(particle_t));
-    particles[i]->x = data[5*i + 0];
+    particles[i]->x = data[5*i];
     particles[i]->y = data[5*i + 1];
     particles[i]->m = data[5*i + 2];
     particles[i]->vx = data[5*i + 3];
