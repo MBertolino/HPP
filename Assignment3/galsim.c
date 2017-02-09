@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
   flag = write_doubles_to_file(N*5, outdata, "result.gal");
   printf("Writing output file: flag = %i\n", flag);
   
-  /* Free memory *
+  /* Free memory */
   for (int i = 0; i < N; i++) {
     free(particles[i]);
     free(particlesPrev[i]);
