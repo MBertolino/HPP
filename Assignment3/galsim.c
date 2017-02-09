@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
       particlesPrev[j]->m = particles[j]->m;
       particlesPrev[j]->vx = particles[j]->vx;
       particlesPrev[j]->vy = particles[j]->vy;
-      
     }
         
     /* Update particles */
