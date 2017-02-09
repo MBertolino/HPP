@@ -71,14 +71,13 @@ int main(int argc, char *argv[]) {
      
     /* Update previous particles */
     for (short j = 0; j < N; j++) {
-      particlesPrev[j] = particles[j];
-      /*
+      //particlesPrev[j] = particles[j];
       particlesPrev[j]->x = particles[j]->x;
       particlesPrev[j]->y = particles[j]->y;
       particlesPrev[j]->m = particles[j]->m;
       particlesPrev[j]->vx = particles[j]->vx;
       particlesPrev[j]->vy = particles[j]->vy;
-      */
+      
     }
         
     /* Update particles */
