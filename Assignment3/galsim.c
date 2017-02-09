@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   }
   float L = 1;
   float W = 1;
-  float radius = 0.01*L;
+  float radius = 0.002*L;
   float circleColor = 0;
   
   /* Constants */
@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
   printf("Reading input file: flag = %i\n", flag);
   
   /* Display input data */
-  printf("\nInput data:\n");
   double x, y, m, vx, vy;
   
   for (short i = 0; i < N; i++) {
@@ -57,7 +56,6 @@ int main(int argc, char *argv[]) {
     m = data[5*i + 2];
     vx = data[5*i + 3];
     vy = data[5*i + 4];
-    printf("%lf\t%lf\t%lf\t%lf\t%lf\n", x, y, m, vx, vy);
   }
   
   /* Create an array for the previous data */
@@ -139,14 +137,12 @@ int main(int argc, char *argv[]) {
   }
   
   /* Display output data */
-  printf("\n\nOutput data:\n");
   for (short i = 0; i < N; i++) {
     x = data[5*i];
     y = data[5*i + 1];
     m = data[5*i + 2];
     vx = data[5*i + 3];
     vy = data[5*i + 4];
-    printf("%lf\t%lf\t%lf\t%lf\t%lf\n", x, y, m, vx, vy);
   }
   printf("\n\n");
   
