@@ -46,7 +46,7 @@ void update(particle_t **particle, short i, const double G,
 	/* Update velocities */	
 	(*particle)->vx = vxi;
 	(*particle)->vy = vyi;
-	
+		
 	/* Update positions */
 	(*particle)->x = xi + delta_t*vxi;
 	(*particle)->y = yi + delta_t*vyi;
