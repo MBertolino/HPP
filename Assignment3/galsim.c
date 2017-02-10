@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   }
     
   /* Input variables */
-  short N = (short)atoi(argv[1]);
+  int N = atoi(argv[1]);
   char *filename = argv[2];
   int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
