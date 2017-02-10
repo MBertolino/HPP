@@ -1,3 +1,13 @@
+/**
+ * Simulation of the gravitational N-body problem.
+ *
+ * Course: High Performance Programming, Uppsala University
+ *
+ * Authors: Adam Lindell <lindell.adam@yahoo.com>
+ *          Arvi Jonnarth <arvi.jj@gmail.com>
+ *			Mattias Bertolino <mattias.bertolino@gmail.com>
+ */
+
 #define _BSD_SOURCE
 
 #include "file_operations/file_operations.h"
