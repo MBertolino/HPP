@@ -8,8 +8,6 @@
 #include <math.h>
 #include <unistd.h> // Sleep function
 
-const int windowWidth = 800;
-
 int main(int argc, char *argv[]) {
   
   /* Check for correct number of input arguments */
@@ -21,18 +19,18 @@ int main(int argc, char *argv[]) {
   /* Input variables */
   int N = atoi(argv[1]);
   char *filename = argv[2];
-  int nsteps = atoi(argv[3]);
+  unsigned int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
-  const int graphics = atoi(argv[5]);
+  int graphics = atoi(argv[5]);
   
   /* Constants */
-  const double G = 100/(double)N;
-  const double epsilon = 0.001;
+  double G = 100/(double)N;
+  double epsilon = 0.001;
   
   /* Define temporary variables */
   double vxi, vyi;
- 	double rij_x, rij_y, dist;
- 	double mass_i, mass_j;
+  double rij_x, rij_y, dist;
+  double mass_i, mass_j;
   
   /* Create an array for the previous data */
   double *dataPrev = (double*)malloc(N*5*sizeof(double));
@@ -49,14 +47,15 @@ int main(int argc, char *argv[]) {
   read_doubles_from_file(N*5, data, fileDest);
   
   /* Setup graphics */
-  if (graphics) {
-    InitializeGraphics(argv[5], windowWidth, windowWidth);
-    SetCAxes(0,1);
-  }
+  int windowWidth = 800;
   float L = 1;
   float W = 1;
   float radius = 0.002*L;
   float circleColor = 0;
+  if (graphics) {
+    InitializeGraphics(argv[5], windowWidth, windowWidth);
+    SetCAxes(0,1);
+  }
   
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
