@@ -1,7 +1,7 @@
 CC = gcc
 LD = gcc
-CFLAGS = -Wall -Werror
-LDFLAGS = -L/opt/X11/lib -lX11 -lm -O3
+CFLAGS = -Wall -Werror -Ofast
+LDFLAGS = -L/opt/X11/lib -lX11 -lm
 INCLUDES = -I/opt/X11/include
 RM = /bin/rm -f
 OBJS = galsim.o file_operations.o graphics.o
