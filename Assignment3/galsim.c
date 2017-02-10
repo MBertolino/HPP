@@ -25,6 +25,29 @@ int main(int argc, char *argv[]) {
   double delta_t = atof(argv[4]);
   const int graphics = atoi(argv[5]);
   
+  /* Constants */
+  const double G = 100/(double)N;
+  const double epsilon = 0.001;
+  
+  /* Define temporary variables */
+  double vxi, vyi;
+ 	double rij_x, rij_y, dist;
+ 	double mass_i, mass_j;
+  
+  /* Create an array for the previous data */
+  double *dataPrev = (double*)malloc(N*5*sizeof(double));
+  
+  /* Force vectors */
+  double *force_x = (double*)malloc(N*sizeof(double));
+  double *force_y = (double*)malloc(N*sizeof(double));
+  
+  /* Read file */
+  char fileDest[50];
+  strcpy(fileDest, "input_data/");
+  strcat(fileDest, filename);
+  double *data = (double*)malloc(N*5*sizeof(double));
+  read_doubles_from_file(N*5, data, fileDest);
+  
   /* Setup graphics */
   if (graphics) {
     InitializeGraphics(argv[5], windowWidth, windowWidth);
@@ -35,79 +58,57 @@ int main(int argc, char *argv[]) {
   float radius = 0.002*L;
   float circleColor = 0;
   
-  /* Constants */
-  const double G = 100/(double)N;
-  const double epsilon = 0.001;
-  
-  /* Read file */
-  char fileDest[50];
-  strcpy(fileDest, "input_data/");
-  strcat(fileDest, filename);
-  double *data = (double*)malloc(N*5*sizeof(double));
-  read_doubles_from_file(N*5, data, fileDest);
-  
-  /* Create an array for the previous data */
-  double *dataPrev = (double*)malloc(N*5*sizeof(double));
-  
-  /* Define temporary variables */
-  double xi, yi, vxi, vyi;
-  double force_x, force_y;
-	double acc_x, acc_y;
- 	double rij_x, rij_y, rij, dist;
- 	double mass_j;
-  
   /* Loop over time */
-  for (short k = 0; k < nsteps; k++) {
+  for (int k = 0; k < nsteps; k++) {
     
     /* Update previous data */
-    for (short i = 0; i < N*5; i++) {
+    for (int i = 0; i < N*5; i++) {
       dataPrev[i] = data[i];
     }
     
-    /* Update particles */
-    for (short i = 0; i < N; i++) {
-      
-      /* Position and velocity */
-      xi = dataPrev[5*i];
-      yi = dataPrev[5*i + 1];
-      vxi = dataPrev[5*i + 3];
-      vyi = dataPrev[5*i + 4];
-      
-      /* Compute each particle contribution */
-      force_x = 0;
-      force_y = 0;
-      for (short j = 0; j < N; j++) {
-        if (j == i) continue;
+    /* Reset the force vectors */
+    for (int i = 0; i < N; i++) {
+      force_x[i] = 0;
+      force_y[i] = 0;
+    }
+    
+    /* Compute the forces */
+    for (int i = 0; i < N; i++) {
+      for (int j = i; j < N; j++) {
+        if (i == j) continue;
         
-        rij_x = xi - dataPrev[5*j];
-        rij_y = yi - dataPrev[5*j + 1];
-        rij = sqrt(rij_x*rij_x + rij_y*rij_y);
-        dist = rij + epsilon;
+        /* Compute the relative vector and the distance */
+        rij_x = dataPrev[5*i] - dataPrev[5*j];
+        rij_y = dataPrev[5*i + 1] - dataPrev[5*j + 1];
+        dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
         
-        /* Calculate forces */
+        /* Update the forces */
+        mass_i = dataPrev[5*i + 2];
         mass_j = dataPrev[5*j + 2];
-        force_x += (mass_j)/(dist*dist*dist)*rij_x;
-        force_y += (mass_j)/(dist*dist*dist)*rij_y;
+        force_x[i] += mass_j/(dist*dist*dist)*rij_x;
+        force_x[j] += -mass_i/(dist*dist*dist)*rij_x;
+        force_y[i] += mass_j/(dist*dist*dist)*rij_y;
+        force_y[j] += -mass_i/(dist*dist*dist)*rij_y;
       }
+    }
+    
+    /* Update positions and velocities */
+    for (int i = 0; i < N; i++) {
       
-      /* Calculate accelerations */
-      acc_x = -G*force_x;
-      acc_y = -G*force_y;
-      
-      /* Calculate velocities */	
-      vxi += delta_t*acc_x;
-      vyi += delta_t*acc_y;
+      /* Calculate velocities */
+      vxi = dataPrev[5*i + 3] - G*force_x[i]*delta_t;
+      vyi = dataPrev[5*i + 4] - G*force_y[i]*delta_t;
       
       /* Update velocities */	
       data[5*i + 3] = vxi;
       data[5*i + 4] = vyi;
       
-      /* Update positions and mass */
-      data[5*i] = xi + delta_t*vxi;
-      data[5*i + 1] = yi + delta_t*vyi;
+      /* Update positions */
+      data[5*i] = dataPrev[5*i] + delta_t*vxi;
+      data[5*i + 1] = dataPrev[5*i + 1] + delta_t*vyi;
     }
     
-    /* Do graphics. */
+    /* Do graphics */
     if (graphics) {
       ClearScreen();
       for (short i = 0; i < N; i++) {
@@ -130,6 +131,8 @@ int main(int argc, char *argv[]) {
   /* Free memory */
   free(data);
   free(dataPrev);
+  free(force_x);
+  free(force_y);
   
   return 0;
 }
