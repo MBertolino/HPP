@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
     /* Do graphics */
     if (graphics) {
       ClearScreen();
-      for (short i = 0; i < N; i++) {
+      for (int i = 0; i < N; i++) {
         DrawCircle(data[5*i], data[5*i + 1], L, W, radius, circleColor);
       }
       Refresh();
