@@ -4,7 +4,6 @@
 #include "graphics/graphics.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include <unistd.h> // Sleep function
 
@@ -40,11 +39,8 @@ int main(int argc, char *argv[]) {
   double *force_y = (double*)malloc(N*sizeof(double));
   
   /* Read file */
-  char fileDest[50];
-  strcpy(fileDest, "input_data/");
-  strcat(fileDest, filename);
   double *data = (double*)malloc(N*5*sizeof(double));
-  read_doubles_from_file(N*5, data, fileDest);
+  read_doubles_from_file(N*5, data, filename);
   
   /* Setup graphics */
   int windowWidth = 800;
