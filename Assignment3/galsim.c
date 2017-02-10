@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
   
   /* Define temporary variables */
   double vxi, vyi;
- 	double rij_x, rij_y, dist, dist3;
+ 	double rij_x, rij_y, dist;
  	double mass_i, mass_j;
   
   /* Create an array for the previous data */
@@ -74,22 +74,20 @@ int main(int argc, char *argv[]) {
     
     /* Compute the forces */
     for (int i = 0; i < N; i++) {
-      for (int j = i; j < N; j++) {
-        if (i == j) continue;
+      for (int j = i+1; j < N; j++) {
         
         /* Compute the relative vector and the distance */
         rij_x = dataPrev[5*i] - dataPrev[5*j];
         rij_y = dataPrev[5*i + 1] - dataPrev[5*j + 1];
         dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
-        dist3 = dist*dist*dist;
         
         /* Update the forces */
         mass_i = dataPrev[5*i + 2];
         mass_j = dataPrev[5*j + 2];
-        force_x[i] += mass_j/dist3*rij_x;
-        force_x[j] += -mass_i/dist3*rij_x;
-        force_y[i] += mass_j/dist3*rij_y;
-        force_y[j] += -mass_i/dist3*rij_y;
+        force_x[i] += mass_j/(dist*dist*dist)*rij_x;
+        force_x[j] += -mass_i/(dist*dist*dist)*rij_x;
+        force_y[i] += mass_j/(dist*dist*dist)*rij_y;
+        force_y[j] += -mass_i/(dist*dist*dist)*rij_y;
       }
     }
     
