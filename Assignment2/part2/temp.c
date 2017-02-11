@@ -77,7 +77,7 @@ int main() {
 		switch(command) {
 			case 'A': case 'a':
 				scanf("%i%lf%lf", &day, &min, &max);
-				if(day <= 31 && day >= 0) {
+				if(day <= 31 && day > 0) {
 					insert(&head, day, min, max);
 				} else {
 					printf("%i is not a day in January\n", day);
@@ -85,7 +85,7 @@ int main() {
 				break;
 			case 'D': case 'd':
 				scanf("%i", &day);
-				if(day <= 31 && day >=0) {
+				if(day <= 31 && day > 0) {
 					delete(&head, day);
 				} else {
 					printf("%i is not a day in January\n", day);
