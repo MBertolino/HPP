@@ -22,7 +22,7 @@ void print_list(node_t *node) {
 
 void insert(node_t **node, int day, double min, double max) {
 	if((*node) == NULL) {
-		// Add new node
+		/* Add new node */
 		node_t *new_node = (node_t *)malloc(sizeof(node_t));
 		new_node->day = day;
 		new_node->min = min;
@@ -30,7 +30,7 @@ void insert(node_t **node, int day, double min, double max) {
 		new_node->next = NULL;
 		*node = new_node;	
 	} else if(day < (*node)->day) {
-		// Push the nodes
+		/* Push the nodes */
 		node_t *new_node = (node_t *)malloc(sizeof(node_t));
     	new_node->day = day;
     	new_node->min = min;
@@ -38,7 +38,7 @@ void insert(node_t **node, int day, double min, double max) {
     	new_node->next = *node;
    		*node = new_node;
 	} else if(day == (*node)->day) {
-		// Update node
+		/* Update node */
 		(*node)->min = min;
 		(*node)->max = max;
 	} else {
@@ -47,19 +47,21 @@ void insert(node_t **node, int day, double min, double max) {
 }
 
 void delete(node_t **node, int day) {
-	if(day == (*node)->day) {
-		// If the node is found, delete it
+	if(*node == NULL) {
+		printf("No such node.\n");	
+	} else if(day == (*node)->day) {
+		/* If the node is found, delete it */
 		(*node)->day = 0;
 		(*node)->min = 0;
 		(*node)->max = 0;
-		(*node) = (*node)->next;
-	} else if((*node)->next !=NULL && day > (*node)->day) {
-		// Step forward in the list
-		delete(&((*node)->next), day);
+		node_t *toDelete = *node;
+		*node = (*node)->next;
+		free(toDelete);
 	} else {
-		printf("No such node.\n");
+		delete(&((*node)->next), day);
 	}
 }
+
 int main() {
 	node_t *head = NULL;
 	int day;
@@ -71,7 +73,7 @@ int main() {
 		printf("Enter command: ");
 		scanf(" %c", &command);
 		
-		// For given command do something
+		/* For given command do something */
 		switch(command) {
 			case 'A': case 'a':
 				scanf("%i%lf%lf", &day, &min, &max);
@@ -101,6 +103,15 @@ int main() {
 				printf("Wrong command, use A, D, P or Q\n");
 		}
 	}	
-		
+	
+	/* Free the nodes */
+	node_t *node = head;
+	while(node != NULL) {
+		node_t *temp = node;
+		node = node->next;
+		free(temp);
+	}
+	free(node);
+	
 	return 0;
 }
