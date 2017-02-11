@@ -14,5 +14,5 @@ temp.o: temp.c
 	$(CC) $(CFLAGS) -c temp.c
 
 clean:
-	$(RM) $(TEMP) $(OBJS)
+	$(RM) $(TEMP) *.o *~
 

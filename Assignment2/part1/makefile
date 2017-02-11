@@ -14,5 +14,5 @@ triang.o: triang.c
 	$(CC) $(CFLAGS) -c triang.c
 
 clean:
-	$(RM) $(PASC) $(OBJS)
+	$(RM) $(PASC) *.o *~
 

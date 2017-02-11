@@ -52,12 +52,11 @@ void delete(node_t **node, int day) {
 		(*node)->day = 0;
 		(*node)->min = 0;
 		(*node)->max = 0;
-		free(*node);
-		(*node) = (*node)->next;		
-	} else if(day > (*node)->day) {
+		(*node) = (*node)->next;
+	} else if((*node)->next !=NULL && day > (*node)->day) {
 		// Step forward in the list
 		delete(&((*node)->next), day);
-	} else if((*node)->next == NULL || day < (*node)->next->day) {
+	} else {
 		printf("No such node.\n");
 	}
 }
@@ -102,6 +101,6 @@ int main() {
 				printf("Wrong command, use A, D, P or Q\n");
 		}
 	}	
-
+		
 	return 0;
 }
