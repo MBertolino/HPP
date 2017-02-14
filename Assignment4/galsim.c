@@ -32,9 +32,23 @@ void update_tree(node_t *tree, node_t *new_tree) {
 
 }
 
-void force_function(node_t *tree, double x, double y, double m, double vx, double vy){
-
-
+void force_function(node_t *tree, double *x, double *y, double *m, double *vx, double *vy, double theta_max) {
+	double theta = 0;
+		
+	if (tree->size != 1) {
+		theta = (tree->width)/(sqrt((x-tree->x)^2 + (y-tree->y)^2));
+	}
+	if (theta > theta_max) {
+		/* Traverse down the tree*/
+		force_function(tree->nw, ...);
+		force_function(tree->ne, ...);
+		force_function(tree->sw, ...);
+		force_function(tree->se, ...);
+	} else {
+		/* Leaf or cluster - compute the force distribution*/
+		
+	}
+	return;
 }
 
 /* Insert a new node */
