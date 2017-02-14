@@ -125,7 +125,8 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		} else {
 			if (y < (*node)->origo_y) // South East
 				insert((&(*node)->se), x, y, m, vx, vy, width/2);
-			else // North East&(*node)->ne), x, y, m, vx, vy, width/2);
+			else // North East
+        insert((&(*node)->ne), x, y, m, vx, vy, width/2);
 		}
 		
 		/* Update this nodes properties */
