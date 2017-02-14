@@ -16,7 +16,7 @@ int read_doubles_from_file(int n, double* p, const char* fileName) {
   if(fileSize != n * sizeof(double)) {
     printf("read_doubles_from_file error: size of input file '%s' does not match the given n.\n", fileName);
     printf("For n = %d the file size is expected to be (n * sizeof(double)) = %lu but the actual file size is %lu.\n",
-	   n, n * sizeof(double), fileSize);
+	   n, (long unsigned int)n * sizeof(double), (long unsigned int)fileSize);
     return -1;
   }
   /* Read contents of input_file into buffer. */
