@@ -27,6 +27,16 @@ struct quad_node {
 	int size;
 } node_t;
 
+void update_tree(node_t *tree, node_t *new_tree) {
+	
+
+}
+
+void force_function(node_t *tree, double x, double y, double m, double vx, double vy){
+
+
+}
+
 /* Insert a new node */
 void insert(node_t **node, double origo_x, double origo_y, double width,
 						double x, double y, double m, double vx, double vy) {
@@ -161,8 +171,7 @@ int main(int argc, char *argv[]) {
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
     
-    /* Build the new tree by computing the new positions and velocities *
-    ...
+    /* Build the new tree by computing the new positions and velocities *   
     ...
     ... //*/
     
