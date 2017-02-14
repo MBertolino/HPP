@@ -116,8 +116,8 @@ int main(int argc, char *argv[]) {
   printf("Size of struct: %lu\n", sizeof(struct quad_node));
   
   /* Check for correct number of input arguments */
-  if (argc != 6) {
-    printf("Error: Expected exactly 5 input arguments.");
+  if (argc != 7) {
+    printf("Error: Expected exactly 6 input arguments.");
     return -1;
   }
     
@@ -127,26 +127,25 @@ int main(int argc, char *argv[]) {
   unsigned int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
   int graphics = atoi(argv[5]);
+  double theta = atof(argv[6]);
   
   /* Constants */
   double G = 100/(double)N;
   double epsilon = 0.001;
   
-  /* Define temporary variables */
+  /* Define temporary variables *
   double vxi, vyi;
   double rij_x, rij_y, dist;
-  double mass_i, mass_j;
-  
-  /* Create an array for the previous data */
-  double *dataPrev = (double*)malloc(N*5*sizeof(double));
-  
-  /* Force vectors */
-  double *force_x = (double*)malloc(N*sizeof(double));
-  double *force_y = (double*)malloc(N*sizeof(double));
+  double mass_i, mass_j; //*/
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
+  
+  /* Build the first tree *
+  ...
+  ...
+  ... //*/
   
   /* Setup graphics */
   int windowWidth = 800;
@@ -162,58 +161,28 @@ int main(int argc, char *argv[]) {
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
     
-    /* Update previous data */
-    for (int i = 0; i < 5*N; i++) {
-      dataPrev[i] = data[i];
-    }
+    /* Build the new tree by computing the new positions and velocities *
+    ...
+    ...
+    ... //*/
     
-    /* Reset the force vectors */
-    for (int i = 0; i < N; i++) {
-      force_x[i] = 0;
-      force_y[i] = 0;
-    }
+    /* Clear the old tree *
+    ...
+    ...
+    ... //*/
     
-    /* Compute the forces */
-    for (int i = 0; i < N; i++) {
-      for (int j = i+1; j < N; j++) {
-        
-        /* Compute the relative vector and the distance */
-        rij_x = dataPrev[5*i] - dataPrev[5*j];
-        rij_y = dataPrev[5*i + 1] - dataPrev[5*j + 1];
-        dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
-        
-        /* Update the forces */
-        mass_i = dataPrev[5*i + 2];
-        mass_j = dataPrev[5*j + 2];
-        force_x[i] += mass_j/(dist*dist*dist)*rij_x;
-        force_x[j] += -mass_i/(dist*dist*dist)*rij_x;
-        force_y[i] += mass_j/(dist*dist*dist)*rij_y;
-        force_y[j] += -mass_i/(dist*dist*dist)*rij_y;
-      }
-    }
-    
-    /* Update positions and velocities */
-    for (int i = 0; i < N; i++) {
-      
-      /* Calculate velocities */
-      vxi = dataPrev[5*i + 3] - G*force_x[i]*delta_t;
-      vyi = dataPrev[5*i + 4] - G*force_y[i]*delta_t;
-      
-      /* Update velocities */	
-      data[5*i + 3] = vxi;
-      data[5*i + 4] = vyi;
-      
-      /* Update positions */
-      data[5*i] = dataPrev[5*i] + delta_t*vxi;
-      data[5*i + 1] = dataPrev[5*i + 1] + delta_t*vyi;
-    }
+    /* Copy the new tree into the old tree */
+    *temp = *new_tree;
+    *new_tree = *tree;
+    *tree = *temp;
+    //*/
     
     /* Do graphics */
     if (graphics) {
       ClearScreen();
-      for (int i = 0; i < N; i++) {
-        DrawCircle(data[5*i], data[5*i + 1], L, W, radius, circleColor);
-      }
+      //for (int i = 0; i < N; i++) {
+      //  DrawCircle(data[5*i], data[5*i + 1], L, W, radius, circleColor);
+      //}
       Refresh();
       usleep(10);
     }
@@ -225,14 +194,16 @@ int main(int argc, char *argv[]) {
     CloseDisplay();
   }
     
-  /* Write result file */
+  /* Write result file *
+  ...
+  ...
+  ... //*/
   write_doubles_to_file(N*5, data, "result.gal");
   
-  /* Free memory */
-  free(data);
-  free(dataPrev);
-  free(force_x);
-  free(force_y);
+  /* Free memory *
+  ...
+  ...
+  ... //*/
   
   return 0;
 }
