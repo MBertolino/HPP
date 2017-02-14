@@ -42,18 +42,14 @@ int main(int argc, char *argv[]) {
   double rij_x, rij_y, dist;
   double mass_i, mass_j; //*/
   
-  /* Create an array for the previous data *
-  ...
-  ...
-  ... //*/
-  
-  /* Force vectors */
-  double *force_x = (double*)malloc(N*sizeof(double));
-  double *force_y = (double*)malloc(N*sizeof(double));
-  
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
+  
+  /* Build the first tree *
+  ...
+  ...
+  ... //*/
   
   /* Setup graphics */
   int windowWidth = 800;
@@ -69,20 +65,21 @@ int main(int argc, char *argv[]) {
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
     
-    /* Reset previous data *
+    /* Build the new tree by computing the new positions and velocities *
     ...
     ...
     ... //*/
     
-    /* Compute the forces *
+    /* Clear the old tree *
     ...
     ...
     ... //*/
     
-    /* Update positions and velocities *
-    ...
-    ...
-    ... //*/
+    /* Copy the new tree into the old tree */
+    *temp = *new_tree;
+    *new_tree = *tree;
+    *tree = *temp;
+    //*/
     
     /* Do graphics */
     if (graphics) {
