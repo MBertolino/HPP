@@ -35,22 +35,42 @@ void update_tree(node_t *tree, node_t *new_tree) {
 } //*/
 
 
-/*  *
-void force_function(node_t *tree, double *x, double *y, double *m, double *vx, double *vy, double theta_max) {
+/*  */
+void force_function(node_t *tree, double *x, double *y, double *m, double *vx, double *vy, double theta_max, double delta_t) {
 	double theta = 0;
-		
+	double force_x = 0;
+	double force_y = 0;
+	
 	if (tree->size != 1) {
-		theta = (tree->width)/(sqrt((x-tree->x)^2 + (y-tree->y)^2));
+		theta = (tree->width)/(sqrt(((*x)-tree->x)*((*x)-tree->x) + ((*y)-tree->y)*((*y)-tree->y)));
 	}
 	if (theta > theta_max) {
-		// Traverse down the tree *
-		force_function(tree->nw, ...);
-		force_function(tree->ne, ...);
-		force_function(tree->sw, ...);
-		force_function(tree->se, ...);
+		/* Traverse down the tree */
+		force_function(tree->nw, x, y, m, vx, vy, theta_max, delta_t);
+		force_function(tree->ne, x, y, m, vx, vy, theta_max, delta_t);
+		force_function(tree->sw, x, y, m, vx, vy, theta_max, delta_t);
+		force_function(tree->se, x, y, m, vx, vy, theta_max, delta_t);
 	} else {
-		// Leaf or cluster - compute the force distribution *
+		double G = 100; // OBS OBS OBS HUR GÖRA MED KONSTANTERNA?
+		double epsilon = 0.001;
+	
+		/* Leaf or cluster - compute the force distribution
+		 Compute the relative vector and the distance */
+		double rij_x = *x - tree->x;
+		double rij_y = *y - tree->y;
+		double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
 		
+		/* Compute the forces*/
+		force_x += tree->m/(dist*dist*dist)*rij_x;
+		force_y += tree->m/(dist*dist*dist)*rij_y;
+    
+		/* Calculate velocities */
+		*vx = *vx - G*force_x*delta_t;
+		*vy = *vy - G*force_y*delta_t;
+      
+		/* Update positions */
+		*x = *x + delta_t*(*vx);
+		*y = *y + delta_t*(*vy);
 	}
 	return;
 } //*/
@@ -177,6 +197,16 @@ void print_tree(node_t *tree, int nSpaces) {
   }
 }
 
+/* Recursively freez the treez*/
+void free_tree(node_t *node) {
+	if(node) {
+		free_tree(node->nw);
+		free_tree(node->ne);
+		free_tree(node->sw);
+		free_tree(node->se);
+		free(node);
+	}
+}
 
 int main(int argc, char *argv[]) {
   printf("Size of struct: %lu\n", (long unsigned int)sizeof(struct quad_node));
@@ -232,10 +262,8 @@ int main(int argc, char *argv[]) {
     ...
     ... //*/
     
-    /* Clear the old tree *
-    ...
-    ...
-    ... //*/
+    /* Clear the old tree (Valgrind klagar nu eftersom update_tree ej implementerad)  */
+    free_tree(tree); //*/
     
     /* Copy the new tree into the old tree */
     temp = new_tree;
@@ -267,9 +295,8 @@ int main(int argc, char *argv[]) {
   write_doubles_to_file(N*5, data, "result.gal");
   
   /* Free memory *
-  ...
-  ...
-  ... //*/
+	...
+	...	//*/
   
   return 0;
 }
