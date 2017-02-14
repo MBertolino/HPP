@@ -17,7 +17,8 @@
 #include <math.h>
 #include <unistd.h> // Sleep function
 
-struct quad_node {
+/* Define the quad_node struct */
+typedef struct quad_node {
 	struct quad_node *nw, *ne, *sw, *se;
 	double origo_x, origo_y;
 	double width;
@@ -27,11 +28,14 @@ struct quad_node {
 	int size;
 } node_t;
 
+
+/*  *
 void update_tree(node_t *tree, node_t *new_tree) {
-	
+  
+} //*/
 
-}
 
+/*  *
 void force_function(node_t *tree, double *x, double *y, double *m, double *vx, double *vy, double theta_max) {
 	double theta = 0;
 		
@@ -39,17 +43,18 @@ void force_function(node_t *tree, double *x, double *y, double *m, double *vx, d
 		theta = (tree->width)/(sqrt((x-tree->x)^2 + (y-tree->y)^2));
 	}
 	if (theta > theta_max) {
-		/* Traverse down the tree*/
+		// Traverse down the tree *
 		force_function(tree->nw, ...);
 		force_function(tree->ne, ...);
 		force_function(tree->sw, ...);
 		force_function(tree->se, ...);
 	} else {
-		/* Leaf or cluster - compute the force distribution*/
+		// Leaf or cluster - compute the force distribution *
 		
 	}
 	return;
-}
+} //*/
+
 
 /* Insert a new node */
 void insert(node_t **node, double origo_x, double origo_y, double width,
@@ -73,37 +78,41 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		(*node)->se = NULL;
 	
 	/* If this is a leaf node, split the node */
-	} else if (size == 1) {
+	} else if ((*node)->size == 1) {
 		(*node)->size += 1;
 		
 		/* Add previous particle */
 		if ((*node)->x < (*node)->origo_x) {
 			if ((*node)->y < (*node)->origo_y) // South West
-				insert((&(*node)->sw), (*node)->x, (*node)->y,
-							 (*node)->m, (*node)->vx, (*node)->vy, width/2);
+				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
+                (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
 			else // North West
-				insert((&(*node)->nw), (*node)->x, (*node)->y,
-							 (*node)->m, (*node)->vx, (*node)->vy, width/2);
+				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
+               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
 		} else {
 			if ((*node)->y < (*node)->origo_y) // South East
-				insert((&(*node)->se), (*node)->x, (*node)->y,
-							 (*node)->m, (*node)->vx, (*node)->vy, width/2);
+				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
+               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
 			else // North East
-				insert((&(*node)->ne), (*node)->x, (*node)->y,
-							 (*node)->m, (*node)->vx, (*node)->vy, width/2);
+				insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
+               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
 		}
 		
 		/* Add new particle */
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
-				insert((&(*node)->sw), x, y, m, vx, vy, width/2);
+				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
+               x, y, m, vx, vy);
 			else // North West
-				insert((&(*node)->nw), x, y, m, vx, vy, width/2);
+				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
+               x, y, m, vx, vy);
 		} else {
 			if (y < (*node)->origo_y) // South East
-				insert((&(*node)->se), x, y, m, vx, vy, width/2);
+				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
+               x, y, m, vx, vy);
 			else // North East
-				insert((&(*node)->ne), x, y, m, vx, vy, width/2);
+				insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
+               x, y, m, vx, vy);
 		}
 		
 		/* Update this nodes properties */
@@ -119,26 +128,58 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		/* Add new particle */
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
-				insert((&(*node)->sw), x, y, m, vx, vy, width/2);
+				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
+               x, y, m, vx, vy);
 			else // North West
-				insert((&(*node)->nw), x, y, m, vx, vy, width/2);
+				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
+               x, y, m, vx, vy);
 		} else {
 			if (y < (*node)->origo_y) // South East
-				insert((&(*node)->se), x, y, m, vx, vy, width/2);
+				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
+               x, y, m, vx, vy);
 			else // North East
-        insert((&(*node)->ne), x, y, m, vx, vy, width/2);
+        insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
+               x, y, m, vx, vy);
 		}
 		
 		/* Update this nodes properties */
 		(*node)->size += 1;
-		(*node)->x = (((*node)->x)*size + x)/(size + 1);
-		(*node)->y = (((*node)->y)*size + y)/(size + 1);
+		(*node)->x = (((*node)->x)*((*node)->size) + x)/(((*node)->size) + 1);
+		(*node)->y = (((*node)->y)*((*node)->size) + y)/(((*node)->size) + 1);
 		(*node)->m += m;
 	}
 } //*/
 
+
+/* Print the tree */
+void print_tree(node_t *tree, int nSpaces) {
+  
+  // Null node
+  if (tree == NULL) {
+    //printf("NULL\n");
+    return;
+  
+  // Leaf node
+  } else if (tree->size == 1) {
+    printf("Leaf: x = %lf, y = %lf\n", tree->x, tree->y);
+  
+  // Cluster
+  } else {
+    printf("Cluster: ox = %lf, oy = %lf\n", tree->origo_x, tree->origo_y);
+    if (tree->nw != NULL)
+      printf("%*snw: ", nSpaces, " "); print_tree(tree->nw, nSpaces + 2);
+    if (tree->ne != NULL)
+      printf("%*sne: ", nSpaces, " "); print_tree(tree->ne, nSpaces + 2);
+    if (tree->sw != NULL)
+      printf("%*ssw: ", nSpaces, " "); print_tree(tree->sw, nSpaces + 2);
+    if (tree->se != NULL)
+      printf("%*sse: ", nSpaces, " "); print_tree(tree->se, nSpaces + 2);
+  }
+}
+
+
 int main(int argc, char *argv[]) {
-  printf("Size of struct: %lu\n", sizeof(struct quad_node));
+  printf("Size of struct: %lu\n", (long unsigned int)sizeof(struct quad_node));
   
   /* Check for correct number of input arguments */
   if (argc != 7) {
@@ -150,13 +191,13 @@ int main(int argc, char *argv[]) {
   int N = atoi(argv[1]);
   char *filename = argv[2];
   unsigned int nsteps = atoi(argv[3]);
-  double delta_t = atof(argv[4]);
+  //double delta_t = atof(argv[4]);
   int graphics = atoi(argv[5]);
-  double theta = atof(argv[6]);
+  //double theta = atof(argv[6]);
   
   /* Constants */
-  double G = 100/(double)N;
-  double epsilon = 0.001;
+  //double G = 100/(double)N;
+  //double epsilon = 0.001;
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -167,16 +208,18 @@ int main(int argc, char *argv[]) {
   node_t *new_tree = NULL;
   node_t *temp = (node_t*)malloc(sizeof(node_t));
   for (int i = 0; i < N; i++) {
-    insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
+    insert(&tree, 0.5, 0.5, 1, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4]);
   }
   
+  print_tree(tree, 0);
+  
   /* Setup graphics */
   int windowWidth = 800;
-  float L = 1;
-  float W = 1;
-  float radius = 0.002*L;
-  float circleColor = 0;
+  //float L = 1;
+  //float W = 1;
+  //float radius = 0.002*L;
+  //float circleColor = 0;
   if (graphics) {
     InitializeGraphics(argv[5], windowWidth, windowWidth);
     SetCAxes(0,1);
