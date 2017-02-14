@@ -17,7 +17,16 @@
 #include <math.h>
 #include <unistd.h> // Sleep function
 
+struct quad_node {
+	struct quad_node *nw, *ne, *sw, *se;
+	double vx, vy;
+	double x, y;
+	double mass;
+	int level;
+} node_t;
+
 int main(int argc, char *argv[]) {
+  printf("Size of struct: %lu\n", sizeof(struct quad_node));
   
   /* Check for correct number of input arguments */
   if (argc != 6) {
