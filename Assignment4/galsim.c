@@ -133,19 +133,18 @@ int main(int argc, char *argv[]) {
   double G = 100/(double)N;
   double epsilon = 0.001;
   
-  /* Define temporary variables *
-  double vxi, vyi;
-  double rij_x, rij_y, dist;
-  double mass_i, mass_j; //*/
-  
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
   
-  /* Build the first tree *
-  ...
-  ...
-  ... //*/
+  /* Allocate memory for trees and build the first tree */
+  node_t *tree = NULL;
+  node_t *new_tree = NULL;
+  node_t *temp = (node_t*)malloc(sizeof(node_t));
+  for (int i = 0; i < N; i++) {
+    insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
+           data[5*i + 2], data[5*i + 3], data[5*i + 4]);
+  }
   
   /* Setup graphics */
   int windowWidth = 800;
@@ -172,9 +171,9 @@ int main(int argc, char *argv[]) {
     ... //*/
     
     /* Copy the new tree into the old tree */
-    *temp = *new_tree;
-    *new_tree = *tree;
-    *tree = *temp;
+    temp = new_tree;
+    new_tree = tree;
+    tree = temp;
     //*/
     
     /* Do graphics */
