@@ -210,13 +210,13 @@ void print_tree(node_t *tree, int nSpaces) {
 
 
 /* Recursively freez the treez */
-void free_tree(node_t *node) {
-	if(node) {
-		free_tree(node->nw);
-		free_tree(node->ne);
-		free_tree(node->sw);
-		free_tree(node->se);
-		free(node);
+void free_tree(node_t **tree) {
+	if(*tree) {
+		free_tree(&((*tree)->nw));
+		free_tree(&((*tree)->ne));
+		free_tree(&((*tree)->sw));
+		free_tree(&((*tree)->se));
+		free(*tree);
 	}
 }
 
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
   node_t *new_tree = NULL;
   node_t *temp = (node_t*)malloc(sizeof(node_t));
   for (int i = 0; i < N; i++) {
-    insert(&tree, 0.5, 0.5, 1, data[5*i], data[5*i + 1],
+    insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4]);
   }
   
@@ -285,13 +285,19 @@ int main(int argc, char *argv[]) {
   }
   
   /* Loop over time */
+  printf("\n");
   for (int k = 0; k < nsteps; k++) {
+    
+    printf("k = %i\n", k);
+    print_tree(tree, 0);
+    printf("\n");
     
     /* Build the new tree by computing the new positions and velocities */
     update_tree(tree, &new_tree, theta_max, G, epsilon, delta_t);
     
-    /* Clear the old tree (Valgrind klagar nu eftersom update_tree ej implementerad)  */
-    free_tree(tree);
+    /* Clear the old tree */
+    free_tree(&tree);
+    tree = NULL;
     
     /* Copy the new tree into the old tree */
     temp = new_tree;
@@ -306,13 +312,15 @@ int main(int argc, char *argv[]) {
       usleep(10);
     }
   }
-    
+  
   /* Close graphics */
   if (graphics) {
     FlushDisplay();
     CloseDisplay();
   }
-    
+  
+  print_tree(tree, 0);
+  
   /* Write result file *
   ...
   ...
