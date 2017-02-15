@@ -176,7 +176,7 @@ void update_tree(node_t *tree, node_t **new_tree, double theta_max,
 		double vy = tree->vy - G*force_y*delta_t;
      
     /* Build the new tree */	
-  	insert(new_tree, tree->origo_x, tree->origo_y, tree->width,
+  	insert(new_tree, 0.5, 0.5, tree->width,
   				 tree->x + delta_t*vx, tree->y + delta_t*vy, tree->m, vx, vy);
   }
 } //*/
@@ -287,10 +287,6 @@ int main(int argc, char *argv[]) {
   /* Loop over time */
   printf("\n");
   for (int k = 0; k < nsteps; k++) {
-    
-    printf("k = %i\n", k);
-    print_tree(tree, 0);
-    printf("\n");
     
     /* Build the new tree by computing the new positions and velocities */
     update_tree(tree, &new_tree, theta_max, G, epsilon, delta_t);
