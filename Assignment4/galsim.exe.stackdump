@@ -1,7 +1,0 @@
-Exception: STATUS_STACK_OVERFLOW at eip=6111F0DD
-eax=00000060 ebx=2015D8C4 ecx=0000000C edx=00000000 esi=00000020 edi=00000000
-ebp=00000000 esp=00422FE0 program=C:\cygwin\home\Arvi\HPP\Assigns\github\HPP\Assignment4\galsim.exe, pid 143916, thread unknown (0x22B28)
-cs=001B ds=0023 es=0023 fs=003B gs=0000 ss=0023
-Stack trace:
-Frame     Function  Args
-End of stack trace
