@@ -136,10 +136,14 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 	}
 	if (theta > theta_max) {
 		/* Traverse down the tree */
-		force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
-		force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
-		force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
-		force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
+ 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
+ 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
+ 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
+ 									 theta_max, G, epsilon, delta_t);
 	} else {
 		/* Leaf or cluster - compute the force distribution
 		 Compute the relative vector and the distance */
@@ -159,7 +163,8 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 
 
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
-void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									 theta_max, double G, double epsilon, double delta_t) {
+void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 
+                 theta_max, double G, double epsilon, double delta_t) {
   if (tree == NULL) {
   	return;
   } else if (tree->size != 1) {
@@ -171,7 +176,7 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									
 		double force_x = 0;
 		double force_y = 0;
   	force_function(root, tree, tree->x, tree->y, tree->m, tree->vx,
-  								 tree->vy, &force_x, &force_y, theta_max, G, epsilon, 									 delta_t);
+  								 tree->vy, &force_x, &force_y, theta_max, G, epsilon, delta_t);
   	
   	/* Calculate velocities */
 		double vx = tree->vx - G*force_x*delta_t;
