@@ -125,7 +125,7 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 
 
 /*  */
-void force_function(node_t *tree, double x, double y, double m, double vx, double vy, 
+void force_function(node_t *root, node_t *tree, double x, double y, double m, double vx, double vy, 
 										double *force_x, double *force_y, double theta_max, 
 										double G, double epsilon, double delta_t) {
 	if (tree == NULL) return;
@@ -136,40 +136,42 @@ void force_function(node_t *tree, double x, double y, double m, double vx, doubl
 	}
 	if (theta > theta_max) {
 		/* Traverse down the tree */
-		force_function(tree->nw, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
-		force_function(tree->ne, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
-		force_function(tree->sw, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
-		force_function(tree->se, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
+		force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
+		force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
 	} else {
 		/* Leaf or cluster - compute the force distribution
 		 Compute the relative vector and the distance */
-		double rij_x = x - tree->x;
-		double rij_y = y - tree->y;
+		double rij_x = x - root->x;
+		double rij_y = y - root->y;
 		double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
 		
 		/* Update the forces */
-		*force_x += tree->m/(dist*dist*dist)*rij_x;
-		*force_y += tree->m/(dist*dist*dist)*rij_y;
+		*force_x += (tree->m)/(dist*dist*dist)*rij_x;
+		*force_y += (tree->m)/(dist*dist*dist)*rij_y;
+		
+		printf("force_x = %lf\n", *force_x);
+
   	}
 	return;
 } //*/
 
 
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
-void update_tree(node_t *tree, node_t **new_tree, double theta_max,
-                 double G, double epsilon, double delta_t) {
+void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									 theta_max, double G, double epsilon, double delta_t) {
   if (tree == NULL) {
   	return;
   } else if (tree->size != 1) {
-		update_tree(tree->nw, new_tree, theta_max, G, epsilon, delta_t);
-		update_tree(tree->ne, new_tree, theta_max, G, epsilon, delta_t);
-		update_tree(tree->sw, new_tree, theta_max, G, epsilon, delta_t);
-		update_tree(tree->se, new_tree, theta_max, G, epsilon, delta_t);
+		update_tree(root, tree->nw, new_tree, theta_max, G, epsilon, delta_t);
+		update_tree(root, tree->ne, new_tree, theta_max, G, epsilon, delta_t);
+		update_tree(root, tree->sw, new_tree, theta_max, G, epsilon, delta_t);
+		update_tree(root, tree->se, new_tree, theta_max, G, epsilon, delta_t);
   } else {
 		double force_x = 0;
 		double force_y = 0;
-  	force_function(tree, tree->x, tree->y, tree->m, tree->vx, tree->vy,
-                   &force_x, &force_y, theta_max, G, epsilon, delta_t);
+  	force_function(root, tree, tree->x, tree->y, tree->m, tree->vx,
+  								 tree->vy, &force_x, &force_y, theta_max, G, epsilon, 									 delta_t);
   	
   	/* Calculate velocities */
 		double vx = tree->vx - G*force_x*delta_t;
@@ -291,7 +293,7 @@ int main(int argc, char *argv[]) {
   for (int k = 0; k < nsteps; k++) {
     
     /* Build the new tree by computing the new positions and velocities */
-    update_tree(tree, &new_tree, theta_max, G, epsilon, delta_t);
+    update_tree(tree, tree, &new_tree, theta_max, G, epsilon, delta_t);
     
     /* Clear the old tree */
     free_tree(&tree);
