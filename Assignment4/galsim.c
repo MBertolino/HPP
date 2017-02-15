@@ -29,49 +29,57 @@ typedef struct quad_node {
 } node_t;
 
 
-/*  *
-void update_tree(node_t *tree, node_t *new_tree) {
-  
+/* Copy leaf node particle attributes, update the copied attributes and build a new */
+void update_tree(node_t *tree, node_t **new_tree, double theta_max, double G, double epsilon, double delta_t) {
+  if (node == NULL) {
+  	return;
+  } else if (node->size != 1) {
+		update_tree(tree->nw, new_tree, theta_max);
+		update_tree(tree->ne, new_tree, theta_max);
+		update_tree(tree->sw, new_tree, theta_max);
+		update_tree(tree->se, new_tree, theta_max);
+  } else {
+		double force_x = 0;
+		double force_y = 0;
+  	force_function(tree, x, y, m, vx, vy, &force_x, &force_y, theta_max, G, epsilon, delta_t);
+  	
+  	/* Calculate velocities */
+		double vx = node->vx - G*force_x*delta_t;
+		double vy = node->vy - G*force_y*delta_t;
+     
+    /* Build the new tree */	
+  	insert(new_tree, tree->origo_x, tree->origo_y, tree->width,
+  				 node->x + delta_t*(*vx), node->y + delta_t*(*vy), node->m, vx, vy);
 } //*/
 
 
 /*  */
-void force_function(node_t *tree, double *x, double *y, double *m, double *vx, double *vy, double theta_max, double delta_t) {
+void force_function(node_t *tree, double x, double y, double m, double vx, double vy, 
+										double *force_x, double *force_y, double theta_max, 
+										double G, double epsilon, double delta_t) {
+	if (tree == NULL) return;
 	double theta = 0;
-	double force_x = 0;
-	double force_y = 0;
 	
 	if (tree->size != 1) {
 		theta = (tree->width)/(sqrt(((*x)-tree->x)*((*x)-tree->x) + ((*y)-tree->y)*((*y)-tree->y)));
 	}
 	if (theta > theta_max) {
 		/* Traverse down the tree */
-		force_function(tree->nw, x, y, m, vx, vy, theta_max, delta_t);
-		force_function(tree->ne, x, y, m, vx, vy, theta_max, delta_t);
-		force_function(tree->sw, x, y, m, vx, vy, theta_max, delta_t);
-		force_function(tree->se, x, y, m, vx, vy, theta_max, delta_t);
+		force_function(tree->nw, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
+		force_function(tree->ne, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
+		force_function(tree->sw, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
+		force_function(tree->se, x, y, m, vx, vy, force_x, force_y, theta_max, G, epsilon, delta_t);
 	} else {
-		double G = 100; // OBS OBS OBS HUR GÖRA MED KONSTANTERNA?
-		double epsilon = 0.001;
-	
 		/* Leaf or cluster - compute the force distribution
 		 Compute the relative vector and the distance */
-		double rij_x = *x - tree->x;
-		double rij_y = *y - tree->y;
+		double rij_x = x - tree->x;
+		double rij_y = y - tree->y;
 		double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
 		
-		/* Compute the forces*/
-		force_x += tree->m/(dist*dist*dist)*rij_x;
-		force_y += tree->m/(dist*dist*dist)*rij_y;
-    
-		/* Calculate velocities */
-		*vx = *vx - G*force_x*delta_t;
-		*vy = *vy - G*force_y*delta_t;
-      
-		/* Update positions */
-		*x = *x + delta_t*(*vx);
-		*y = *y + delta_t*(*vy);
-	}
+		/* Update the forces */
+		*force_x += tree->m/(dist*dist*dist)*rij_x;
+		*force_y += tree->m/(dist*dist*dist)*rij_y;
+  	}
 	return;
 } //*/
 
