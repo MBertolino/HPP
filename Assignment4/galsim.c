@@ -192,11 +192,13 @@ void print_tree(node_t *tree, int nSpaces) {
   
   // Leaf node
   } else if (tree->size == 1) {
-    printf("Leaf: x = %lf, y = %lf\n", tree->x, tree->y);
+    printf("Leaf: x = %lf, y = %lf, vx = %lf, vy = %lf\n",
+           tree->x, tree->y, tree->vx, tree->vy);
   
   // Cluster
   } else {
-    printf("Cluster: ox = %lf, oy = %lf\n", tree->origo_x, tree->origo_y);
+    printf("Cluster: ox = %lf, oy = %lf, size = %i\n",
+           tree->origo_x, tree->origo_y, tree->size);
     if (tree->nw != NULL)
       printf("%*snw: ", nSpaces, " "); print_tree(tree->nw, nSpaces + 2);
     if (tree->ne != NULL)
