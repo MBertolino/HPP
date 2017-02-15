@@ -197,7 +197,8 @@ void print_tree(node_t *tree, int nSpaces) {
   }
 }
 
-/* Recursively freez the treez*/
+
+/* Recursively freez the treez */
 void free_tree(node_t *node) {
 	if(node) {
 		free_tree(node->nw);
@@ -208,6 +209,23 @@ void free_tree(node_t *node) {
 	}
 }
 
+
+/* Draw the particles into the window */
+void graphics(node_t *tree, float L, float W, float radius, float circleColor) {
+  if (tree == NULL) {
+    return;
+  } else if (tree->size == 1) {
+    DrawCircle(tree->x, tree->y, L, W, radius, circleColor);
+  } else {
+    graphics(tree->nw, L, W, radius, circleColor);
+    graphics(tree->ne, L, W, radius, circleColor);
+    graphics(tree->sw, L, W, radius, circleColor);
+    graphics(tree->se, L, W, radius, circleColor);
+  }
+}
+
+
+/* Main method */
 int main(int argc, char *argv[]) {
   printf("Size of struct: %lu\n", (long unsigned int)sizeof(struct quad_node));
   
@@ -221,13 +239,13 @@ int main(int argc, char *argv[]) {
   int N = atoi(argv[1]);
   char *filename = argv[2];
   unsigned int nsteps = atoi(argv[3]);
-  //double delta_t = atof(argv[4]);
+  double delta_t = atof(argv[4]);
   int graphics = atoi(argv[5]);
-  //double theta = atof(argv[6]);
+  double theta_max = atof(argv[6]);
   
   /* Constants */
-  //double G = 100/(double)N;
-  //double epsilon = 0.001;
+  double G = 100/(double)N;
+  double epsilon = 0.001;
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -258,25 +276,21 @@ int main(int argc, char *argv[]) {
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
     
-    /* Build the new tree by computing the new positions and velocities *   
-    ...
-    ... //*/
+    /* Build the new tree by computing the new positions and velocities */
+    update_tree(tree, &new_tree, theta_max, G, epsilon, delta_t);
     
     /* Clear the old tree (Valgrind klagar nu eftersom update_tree ej implementerad)  */
-    free_tree(tree); //*/
+    free_tree(tree);
     
     /* Copy the new tree into the old tree */
     temp = new_tree;
     new_tree = tree;
     tree = temp;
-    //*/
     
     /* Do graphics */
     if (graphics) {
       ClearScreen();
-      //for (int i = 0; i < N; i++) {
-      //  DrawCircle(data[5*i], data[5*i + 1], L, W, radius, circleColor);
-      //}
+      graphics(tree, L, W, radius, circleColor);
       Refresh();
       usleep(10);
     }
