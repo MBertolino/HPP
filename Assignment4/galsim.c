@@ -272,10 +272,10 @@ int main(int argc, char *argv[]) {
   
   /* Setup graphics */
   int windowWidth = 800;
-  //float L = 1;
-  //float W = 1;
-  //float radius = 0.002*L;
-  //float circleColor = 0;
+  float L = 1;
+  float W = 1;
+  float radius = 0.002*L;
+  float circleColor = 0;
   if (graphics) {
     InitializeGraphics(argv[5], windowWidth, windowWidth);
     SetCAxes(0,1);
