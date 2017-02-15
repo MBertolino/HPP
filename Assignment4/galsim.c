@@ -25,13 +25,13 @@ typedef struct quad_node {
 	double x, y;
 	double m;
 	double vx, vy;
-	int size;
+	int size, index;
 } node_t;
 
 
 /* Insert a new node */
 void insert(node_t **node, double origo_x, double origo_y, double width,
-						double x, double y, double m, double vx, double vy) {
+						double x, double y, double m, double vx, double vy, int index) {
 	
 	/* If null, this is a leaf node */
 	if ((*node) == NULL) {
@@ -45,6 +45,7 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		(*node)->vx = vx;
 		(*node)->vy = vy;
 		(*node)->size = 1;
+    (*node)->index = index;
 		(*node)->nw = NULL;
 		(*node)->ne = NULL;
 		(*node)->sw = NULL;
@@ -58,34 +59,38 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		if ((*node)->x < (*node)->origo_x) {
 			if ((*node)->y < (*node)->origo_y) // South West
 				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
-                (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
+                (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
+                (*node)->index);
 			else // North West
 				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
-               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
+               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
+               (*node)->index);
 		} else {
 			if ((*node)->y < (*node)->origo_y) // South East
 				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
-               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
+               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
+               (*node)->index);
 			else // North East
 				insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
-               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy);
+               (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
+               (*node)->index);
 		}
 		
 		/* Add new particle */
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
 				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 			else // North West
 				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 		} else {
 			if (y < (*node)->origo_y) // South East
 				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 			else // North East
 				insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 		}
 		
 		/* Update this nodes properties */
@@ -102,17 +107,17 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
 				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 			else // North West
 				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 		} else {
 			if (y < (*node)->origo_y) // South East
 				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 			else // North East
         insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
-               x, y, m, vx, vy);
+               x, y, m, vx, vy, index);
 		}
 		
 		/* Update this nodes properties */
@@ -175,8 +180,8 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									
 		double vy = tree->vy - G*force_y*delta_t;
      
     /* Build the new tree */	
-  	insert(new_tree, 0.5, 0.5, root->width,
-  				 tree->x + delta_t*vx, tree->y + delta_t*vy, tree->m, vx, vy);
+  	insert(new_tree, 0.5, 0.5, root->width, tree->x + delta_t*vx,
+           tree->y + delta_t*vy, tree->m, vx, vy, tree->index);
   }
 } //*/
 
@@ -267,7 +272,7 @@ int main(int argc, char *argv[]) {
   node_t *temp = (node_t*)malloc(sizeof(node_t));
   for (int i = 0; i < N; i++) {
     insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
-           data[5*i + 2], data[5*i + 3], data[5*i + 4]);
+           data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
   
   print_tree(tree, 0);
