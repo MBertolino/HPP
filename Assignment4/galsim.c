@@ -282,6 +282,11 @@ int main(int argc, char *argv[]) {
   const double G = 100/(double)N;
   const double epsilon = 0.001;
   
+  /* Tree properties */
+  const double origo_x = 0.5;
+  const double origo_y = 0.5;
+  const int initialWidth = 1;
+  
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
@@ -291,7 +296,7 @@ int main(int argc, char *argv[]) {
   node_t *new_tree = NULL;
   node_t *temp = (node_t*)malloc(sizeof(node_t));
   for (int i = 0; i < N; i++) {
-    insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
+    insert(&tree, origo_x, origo_y, initialWidth, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
   
@@ -303,7 +308,7 @@ int main(int argc, char *argv[]) {
   const int windowWidth = 800;
   const float L = 1;
   const float W = 1;
-  float radius = 0.002*L;
+  const float radius = 0.002*L;
   const float circleColor = 0;
   if (graphics) {
     InitializeGraphics(argv[5], windowWidth, windowWidth);
@@ -311,7 +316,6 @@ int main(int argc, char *argv[]) {
   }
   
   /* Loop over time */
-  printf("\n");
   for (int k = 0; k < nsteps; k++) {
     
     /* Build the new tree by computing the new positions and velocities */
@@ -348,7 +352,6 @@ int main(int argc, char *argv[]) {
   /* Free memory */
 	free_tree(&tree);
 	free(data);
-	//*/
   
   return 0;
 }
