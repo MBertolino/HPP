@@ -340,11 +340,7 @@ int main(int argc, char *argv[]) {
     FlushDisplay();
     CloseDisplay();
   }
-  
-  /* Print the final tree */
-  printf("Final tree:\n");
-  print_tree(new_tree, 0); //*/
-  
+   
   /* Write result file */
   write_tree(tree, &data);
   write_doubles_to_file(N*5, data, "result.gal");
