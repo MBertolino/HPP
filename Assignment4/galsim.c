@@ -180,20 +180,15 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree,
   if (tree == NULL) {
   	return;
   } else if (tree->size != 1) {
-			update_tree(root, tree->nw, new_tree, theta_max, G, epsilon,
-			delta_t);
-			update_tree(root, tree->ne, new_tree, theta_max, G, epsilon,
-			delta_t);
-			update_tree(root, tree->sw, new_tree, theta_max, G, epsilon,
-			delta_t);
-			update_tree(root, tree->se, new_tree, theta_max, G, epsilon,
-			delta_t);
+			update_tree(root, tree->nw, new_tree, theta_max, G, epsilon, delta_t);
+			update_tree(root, tree->ne, new_tree, theta_max, G, epsilon, delta_t);
+			update_tree(root, tree->sw, new_tree, theta_max, G, epsilon, delta_t);
+			update_tree(root, tree->se, new_tree, theta_max, G, epsilon, delta_t);
   } else {
 		double force_x = 0;
 		double force_y = 0;
-  	force_function(root, root, tree->x, tree->y, tree->m, tree->vx,
-  								 tree->vy, &force_x, &force_y, theta_max, G,
-  								 epsilon,delta_t);
+  	force_function(root, root, tree->x, tree->y, tree->m, tree->vx, tree->vy,
+                   &force_x, &force_y, theta_max, G, epsilon, delta_t);
   	
   	/* Calculate velocities */
 		double vx = tree->vx - G*force_x*delta_t;
@@ -270,7 +265,11 @@ void do_graphics(node_t *tree, float L, float W, float radius, float circleColor
     return;
   } else if (tree->size == 1) {
     DrawCircle(tree->x, tree->y, L, W, radius, circleColor);
+    DrawRectangle(tree->origo_x, tree->origo_y, W, H,
+                  tree->width, tree-width, circleColor);
   } else {
+    DrawRectangle(tree->origo_x, tree->origo_y, W, H,
+                  tree->width, tree-width, circleColor);
     do_graphics(tree->nw, L, W, radius, circleColor);
     do_graphics(tree->ne, L, W, radius, circleColor);
     do_graphics(tree->sw, L, W, radius, circleColor);
