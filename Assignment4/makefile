@@ -1,6 +1,6 @@
 CC = gcc
 LD = gcc
-CFLAGS = -Wall -Werror -O3 -ffast-math
+CFLAGS = -Wall -Werror -O3 -ffast-math -march=native
 LDFLAGS = -L/opt/X11/lib -lX11 -lm
 INCLUDES = -I/opt/X11/include
 RM = /bin/rm -f

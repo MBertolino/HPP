@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h> // Sleep function
+#include <sys/time.h>
 
 
 /* Define the quad_node struct */
@@ -29,6 +30,14 @@ typedef struct quad_node {
 	int size, index;
 } node_t;
 
+
+/* Timings */
+double get_wall_seconds(){
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	double seconds = tv.tv_sec + (double)tv.tv_usec/1000000;
+	return seconds;
+}
 
 /* Insert a new node */
 void insert(node_t **node, double origo_x, double origo_y, double width,
@@ -135,17 +144,17 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 										double *force_x, double *force_y, double theta_max, 
 										double G, double epsilon, double delta_t) {
 	if (tree == NULL) return;
-	double theta = 0;
-	
+
 	if (tree->size != 1) {
-		theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) + (y-tree->y)*(y-tree->y)));
-	}
-	if (theta > theta_max) {
-		/* Traverse down the tree */
-		force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
-		force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
-		force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
-		force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y, 									 theta_max, G, epsilon, delta_t);
+		double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) + 
+		(y-tree->y)*(y-tree->y)));
+		if (theta > theta_max) {
+			/* Traverse down the tree */
+			force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
+			force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
+			force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
+			force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
+			}
 	} else {
 		/* Leaf or cluster - compute the force distribution
 		 Compute the relative vector and the distance */
@@ -166,24 +175,28 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									
   if (tree == NULL) {
   	return;
   } else if (tree->size != 1) {
-		update_tree(root, tree->nw, new_tree, theta_max, G, epsilon, delta_t);
-		update_tree(root, tree->ne, new_tree, theta_max, G, epsilon, delta_t);
-		update_tree(root, tree->sw, new_tree, theta_max, G, epsilon, delta_t);
-		update_tree(root, tree->se, new_tree, theta_max, G, epsilon, delta_t);
+			update_tree(root, tree->nw, new_tree, theta_max, G, epsilon,
+			delta_t);
+			update_tree(root, tree->ne, new_tree, theta_max, G, epsilon,
+			delta_t);
+			update_tree(root, tree->sw, new_tree, theta_max, G, epsilon,
+			delta_t);
+			update_tree(root, tree->se, new_tree, theta_max, G, epsilon,
+			delta_t);
   } else {
 		double force_x = 0;
 		double force_y = 0;
   	force_function(root, root, tree->x, tree->y, tree->m, tree->vx,
-  								 tree->vy, &force_x, &force_y, theta_max, G, epsilon, 									 delta_t);
+  								 tree->vy, &force_x, &force_y, theta_max, G,
+  								 epsilon,delta_t);
   	
   	/* Calculate velocities */
 		double vx = tree->vx - G*force_x*delta_t;
 		double vy = tree->vy - G*force_y*delta_t;
      
     /* Build the new tree */	
-  	insert(new_tree, root->origo_x, root->origo_y, root->width,
-           tree->x + delta_t*vx, tree->y + delta_t*vy, tree->m,
-           vx, vy, tree->index);
+  	insert(new_tree, 0.5, 0.5, root->width, tree->x + delta_t*vx,
+           tree->y + delta_t*vy, tree->m, vx, vy, tree->index);
   }
 } //*/
 
@@ -283,11 +296,6 @@ int main(int argc, char *argv[]) {
   const double G = 100/(double)N;
   const double epsilon = 0.001;
   
-  /* Tree properties */
-  const double origo_x = 0.5;
-  const double origo_y = 0.5;
-  const int initialWidth = 1;
-  
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
@@ -297,7 +305,7 @@ int main(int argc, char *argv[]) {
   node_t *new_tree = NULL;
   node_t *temp = (node_t*)malloc(sizeof(node_t));
   for (int i = 0; i < N; i++) {
-    insert(&tree, origo_x, origo_y, initialWidth, data[5*i], data[5*i + 1],
+    insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
   
@@ -317,11 +325,12 @@ int main(int argc, char *argv[]) {
   }
   
   /* Loop over time */
+  printf("\n");
   for (int k = 0; k < nsteps; k++) {
-    
-    /* Build the new tree by computing the new positions and velocities */
+    /* Build the new tree by computing the new positions and
+    velocities */
     update_tree(tree, tree, &new_tree, theta_max, G, epsilon, delta_t);
-    
+        
     /* Clear the old tree */
     free_tree(&tree);
     tree = NULL;
