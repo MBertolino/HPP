@@ -261,18 +261,14 @@ void free_tree(node_t **tree) {
 
 /* Draw the particles into the window */
 void do_graphics(node_t *tree, float L, float W, float radius, float circleColor) {
-  if (tree == NULL) {
-    return;
-  } else if (tree->size == 1) {
-    DrawRectangle(tree->origo_x - (tree->width)/2, 
-    tree->origo_y - (tree>width)/2, 
-    W, L, tree->width, tree->width, circleColor+0.8);
+  if (tree == NULL) return;
+  DrawRectangle(tree->origo_x - (tree->width)/2,
+                tree->origo_y - (tree->width)/2,
+                W, L, tree->width, tree->width, circleColor + 0.8);
+  
+  if (tree->size == 1) {
     DrawCircle(tree->x, tree->y, L, W, radius, circleColor);
   } else {
-    DrawRectangle(tree->origo_x - (tree->width)/2, 
-    tree->origo_y - (tree->width)/2,
-    W, L, tree->width, tree->width, circleColor+0.8);
-    
     do_graphics(tree->nw, L, W, radius, circleColor);
     do_graphics(tree->ne, L, W, radius, circleColor);
     do_graphics(tree->sw, L, W, radius, circleColor);
