@@ -146,14 +146,18 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 	if (tree == NULL) return;
 
 	if (tree->size != 1) {
-		double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) + 
+		double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) +
 		(y-tree->y)*(y-tree->y)));
 		if (theta > theta_max) {
 			/* Traverse down the tree */
-			force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
-			force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
-			force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
-			force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y, 										 theta_max, G, epsilon, delta_t);
+			force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+			force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+			force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+			force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
 			}
 	} else {
 		/* Leaf or cluster - compute the force distribution
@@ -171,7 +175,8 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 
 
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
-void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									 theta_max, double G, double epsilon, double delta_t) {
+void update_tree(node_t *root, node_t *tree, node_t **new_tree,
+                 double theta_max, double G, double epsilon, double delta_t) {
   if (tree == NULL) {
   	return;
   } else if (tree->size != 1) {
