@@ -265,11 +265,11 @@ void do_graphics(node_t *tree, float L, float W, float radius, float circleColor
     return;
   } else if (tree->size == 1) {
     DrawCircle(tree->x, tree->y, L, W, radius, circleColor);
-    DrawRectangle(tree->origo_x, tree->origo_y, W, L,
-                  tree->width, tree->width, circleColor);
+    DrawRectangle(tree->origo_x - (tree->width)/2, tree->origo_y - (tree->width)/2,
+                  W, L, tree->width, tree->width, circleColor);
   } else {
-    DrawRectangle(tree->origo_x, tree->origo_y, W, L,
-                  tree->width, tree->width, circleColor);
+    DrawRectangle(tree->origo_x - (tree->width)/2, tree->origo_y - (tree->width)/2,
+                  W, L, tree->width, tree->width, circleColor);
     do_graphics(tree->nw, L, W, radius, circleColor);
     do_graphics(tree->ne, L, W, radius, circleColor);
     do_graphics(tree->sw, L, W, radius, circleColor);
