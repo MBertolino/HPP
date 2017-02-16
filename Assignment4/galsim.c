@@ -63,7 +63,6 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 	
 	/* If this is a leaf node, split the node */
 	} else if ((*node)->size == 1) {
-		(*node)->size += 1;
 		
 		/* Add previous particle */
 		if ((*node)->x < (*node)->origo_x) {
@@ -104,8 +103,9 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		}
 		
 		/* Update this nodes properties */
-		(*node)->x = ((*node)->x + x)/2;
-		(*node)->y = ((*node)->y + y)/2;
+    (*node)->size += 1;
+		(*node)->x = (((*node)->x)*((*node)->m) + x*m)/(((*node)->m) + m);
+		(*node)->y = (((*node)->y)*((*node)->m) + y*m)/(((*node)->m) + m);
 		(*node)->m += m;
 		//(*node)->vx = 0;
 		//(*node)->vy = 0;
@@ -131,9 +131,9 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		}
 		
 		/* Update this nodes properties */
-		(*node)->size += 1;
-		(*node)->x = (((*node)->x)*((*node)->size) + x)/(((*node)->size) + 1);
-		(*node)->y = (((*node)->y)*((*node)->size) + y)/(((*node)->size) + 1);
+    (*node)->size += 1;
+		(*node)->x = (((*node)->x)*((*node)->m) + x*m)/(((*node)->m) + m);
+		(*node)->y = (((*node)->y)*((*node)->m) + y*m)/(((*node)->m) + m);
 		(*node)->m += m;
 	}
 } //*/
