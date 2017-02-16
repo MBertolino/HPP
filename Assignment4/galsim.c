@@ -341,16 +341,17 @@ int main(int argc, char *argv[]) {
     CloseDisplay();
   }
   
-  /* Print the final tree *
+  /* Print the final tree */
   printf("Final tree:\n");
-  print_tree(tree, 0); //*/
+  print_tree(new_tree, 0); //*/
   
   /* Write result file */
   write_tree(tree, &data);
   write_doubles_to_file(N*5, data, "result.gal");
   
-  /* Free memory *
-	
+  /* Free memory */
+	free_tree(&tree);
+	free(data);
 	//*/
   
   return 0;
