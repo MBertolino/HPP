@@ -17,6 +17,7 @@
 #include <math.h>
 #include <unistd.h> // Sleep function
 
+
 /* Define the quad_node struct */
 typedef struct quad_node {
 	struct quad_node *nw, *ne, *sw, *se;
@@ -213,6 +214,25 @@ void print_tree(node_t *tree, int nSpaces) {
 }
 
 
+/* Recursively write the tree into a file */
+void write_tree(node_t *tree, double **data) {
+  if (tree == NULL) {
+    return;
+  } else if (tree->size == 1) {
+    (*data)[5*tree->index] = tree->x;
+    (*data)[5*tree->index + 1] = tree->y;
+    (*data)[5*tree->index + 2] = tree->m;
+    (*data)[5*tree->index + 3] = tree->vx;
+    (*data)[5*tree->index + 4] = tree->vy;
+  } else {
+    write_tree(tree->nw, data);
+    write_tree(tree->ne, data);
+    write_tree(tree->sw, data);
+    write_tree(tree->se, data);
+  }
+}
+
+
 /* Recursively freez the treez */
 void free_tree(node_t **tree) {
 	if(*tree) {
@@ -275,6 +295,8 @@ int main(int argc, char *argv[]) {
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
   
+  /* Print the initial tree */
+  printf("Initial tree:\n");
   print_tree(tree, 0);
   
   /* Setup graphics */
@@ -319,12 +341,12 @@ int main(int argc, char *argv[]) {
     CloseDisplay();
   }
   
+  /* Print the final tree */
+  printf("Final tree:\n");
   print_tree(tree, 0);
   
-  /* Write result file *
-  ...
-  ...
-  ... //*/
+  /* Write result file */
+  write_tree(tree, &data);
   write_doubles_to_file(N*5, data, "result.gal");
   
   /* Free memory *
