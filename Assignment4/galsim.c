@@ -181,8 +181,9 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree, double 									
 		double vy = tree->vy - G*force_y*delta_t;
      
     /* Build the new tree */	
-  	insert(new_tree, 0.5, 0.5, root->width, tree->x + delta_t*vx,
-           tree->y + delta_t*vy, tree->m, vx, vy, tree->index);
+  	insert(new_tree, root->origo_x, root->origo_y, root->width,
+           tree->x + delta_t*vx, tree->y + delta_t*vy, tree->m,
+           vx, vy, tree->index);
   }
 } //*/
 
