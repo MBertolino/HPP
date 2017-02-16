@@ -328,7 +328,6 @@ int main(int argc, char *argv[]) {
   }
   
   /* Loop over time */
-  printf("\n");
   for (int k = 0; k < nsteps; k++) {
     /* Build the new tree by computing the new positions and
     velocities */
