@@ -279,8 +279,8 @@ int main(int argc, char *argv[]) {
   double theta_max = atof(argv[6]);
   
   /* Constants */
-  double G = 100/(double)N;
-  double epsilon = 0.001;
+  const double G = 100/(double)N;
+  const double epsilon = 0.001;
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -300,11 +300,11 @@ int main(int argc, char *argv[]) {
   print_tree(tree, 0); //*/
   
   /* Setup graphics */
-  int windowWidth = 800;
-  float L = 1;
-  float W = 1;
+  const int windowWidth = 800;
+  const float L = 1;
+  const float W = 1;
   float radius = 0.002*L;
-  float circleColor = 0;
+  const float circleColor = 0;
   if (graphics) {
     InitializeGraphics(argv[5], windowWidth, windowWidth);
     SetCAxes(0,1);
