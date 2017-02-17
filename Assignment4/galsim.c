@@ -142,7 +142,7 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 /*  */
 void force_function(node_t *root, node_t *tree, double x, double y, double m, double vx, double vy, 
 										double *force_x, double *force_y, double theta_max, 
-										double G, double epsilon, double delta_t) {
+										double G, const double epsilon, double delta_t) {
 	if (tree == NULL) return;
 
 	if (tree->size != 1) {
@@ -176,7 +176,7 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
 void update_tree(node_t *root, node_t *tree, node_t **new_tree,
-                 double theta_max, double G, double epsilon, double delta_t) {
+                 double theta_max, double G, const double epsilon, double delta_t) {
   if (tree == NULL) {
   	return;
   } else if (tree->size != 1) {
@@ -292,11 +292,12 @@ int main(int argc, char *argv[]) {
   char *filename = argv[2];
   unsigned int nsteps = atoi(argv[3]);
   double delta_t = atof(argv[4]);
-  int graphics = atoi(argv[5]);
-  double theta_max = atof(argv[6]);
+  double theta_max = atof(argv[5]);
+  int graphics = atoi(argv[6]);
+
   
   /* Constants */
-  const double G = 100/(double)N;
+  double G = 100/(double)N;
   const double epsilon = 0.001;
   
   /* Read file */
