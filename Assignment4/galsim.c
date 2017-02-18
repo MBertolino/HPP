@@ -67,20 +67,20 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		/* Add previous particle */
 		if ((*node)->x < (*node)->origo_x) {
 			if ((*node)->y < (*node)->origo_y) // South West
-				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
+				insert(&((*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
                 (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
                 (*node)->index);
 			else // North West
-				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
+				insert(&((*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
                (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
                (*node)->index);
 		} else {
 			if ((*node)->y < (*node)->origo_y) // South East
-				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
+				insert(&((*node)->se), origo_x + width/4, origo_y - width/4, width/2,
                (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
                (*node)->index);
 			else // North East
-				insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
+				insert(&((*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
                (*node)->x, (*node)->y, (*node)->m, (*node)->vx, (*node)->vy,
                (*node)->index);
 		}
@@ -88,17 +88,17 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		/* Add new particle */
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
-				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
+				insert(&((*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
                x, y, m, vx, vy, index);
 			else // North West
-				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
+				insert(&((*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
                x, y, m, vx, vy, index);
 		} else {
 			if (y < (*node)->origo_y) // South East
-				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
+				insert(&((*node)->se), origo_x + width/4, origo_y - width/4, width/2,
                x, y, m, vx, vy, index);
 			else // North East
-				insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
+				insert(&((*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
                x, y, m, vx, vy, index);
 		}
 		
@@ -116,17 +116,17 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		/* Add new particle */
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
-				insert((&(*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
+				insert(&((*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
                x, y, m, vx, vy, index);
 			else // North West
-				insert((&(*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
+				insert(&((*node)->nw), origo_x - width/4, origo_y + width/4, width/2,
                x, y, m, vx, vy, index);
 		} else {
 			if (y < (*node)->origo_y) // South East
-				insert((&(*node)->se), origo_x + width/4, origo_y - width/4, width/2,
+				insert(&((*node)->se), origo_x + width/4, origo_y - width/4, width/2,
                x, y, m, vx, vy, index);
 			else // North East
-        insert((&(*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
+        insert(&((*node)->ne), origo_x + width/4, origo_y + width/4, width/2,
                x, y, m, vx, vy, index);
 		}
 		
@@ -141,45 +141,44 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 
 /*  */
 void force_function(node_t *root, node_t *tree, double x, double y, double m, double vx, double vy, 
-										double *force_x, double *force_y, double theta_max, 
+										double *force_x, double *force_y, double theta_max,
 										double G, const double epsilon, double delta_t) {
 	if (tree == NULL) return;
-
-	if (tree->size != 1) {
-		double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) +
-		(y-tree->y)*(y-tree->y)));
-		if (theta > theta_max) {
-			/* Traverse down the tree */
-			force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-			force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-			force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-			force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-			}
+  
+  double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) +
+                 (y-tree->y)*(y-tree->y)));
+  
+  /* Check the theta condition */
+	if (tree->size == 1 || theta <= theta_max) {
+    /* If the condition is met, compute the force distribution
+      Compute the relative vector and the distance */
+    double rij_x = x - tree->x;
+    double rij_y = y - tree->y;
+    double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
+    
+    /* Update the forces */
+    *force_x += (tree->m)/(dist*dist*dist)*rij_x;
+    *force_y += (tree->m)/(dist*dist*dist)*rij_y;
 	} else {
-		/* Leaf or cluster - compute the force distribution
-		 Compute the relative vector and the distance */
-		double rij_x = x - tree->x;
-		double rij_y = y - tree->y;
-		double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
-		
-		/* Update the forces */
-		*force_x += (tree->m)/(dist*dist*dist)*rij_x;
-		*force_y += (tree->m)/(dist*dist*dist)*rij_y;		
+    /* Traverse down the tree if the condition is not met */
+    force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
+                   theta_max, G, epsilon, delta_t);
+		force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
+                   theta_max, G, epsilon, delta_t);
+		force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
+                   theta_max, G, epsilon, delta_t);
+		force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
+                   theta_max, G, epsilon, delta_t);
   }
-  return;
 } //*/
 
 
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
 void update_tree(node_t *root, node_t *tree, node_t **new_tree,
                  double theta_max, double G, const double epsilon, double delta_t) {
-  if (tree == NULL) {
-  	return;
-  } else if (tree->size != 1) {
+  if (tree == NULL) return;
+  
+  if (tree->size != 1) {
 			update_tree(root, tree->nw, new_tree, theta_max, G, epsilon, delta_t);
 			update_tree(root, tree->ne, new_tree, theta_max, G, epsilon, delta_t);
 			update_tree(root, tree->sw, new_tree, theta_max, G, epsilon, delta_t);
