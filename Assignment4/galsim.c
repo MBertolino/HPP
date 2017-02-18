@@ -145,31 +145,33 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 										double G, const double epsilon, double delta_t) {
 	if (tree == NULL) return;
   
-  double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) +
-                 (y-tree->y)*(y-tree->y)));
-  
-  /* Check the theta condition */
-	if (tree->size == 1 || theta <= theta_max) {
-    /* If the condition is met, compute the force distribution
-      Compute the relative vector and the distance */
-    double rij_x = x - tree->x;
-    double rij_y = y - tree->y;
-    double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
+  /* First check if this is a leaf node */
+  if (tree->size != 1) {
+    double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) +
+                   (y-tree->y)*(y-tree->y)));
     
-    /* Update the forces */
-    *force_x += (tree->m)/(dist*dist*dist)*rij_x;
-    *force_y += (tree->m)/(dist*dist*dist)*rij_y;
-	} else {
-    /* Traverse down the tree if the condition is not met */
-    force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
-                   theta_max, G, epsilon, delta_t);
-		force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
-                   theta_max, G, epsilon, delta_t);
-		force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
-                   theta_max, G, epsilon, delta_t);
-		force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
-                   theta_max, G, epsilon, delta_t);
+    if (theta > theta_max) {
+      /* Traverse down the tree if the theta condition is not met */
+      force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+      force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+      force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+      force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
+                     theta_max, G, epsilon, delta_t);
+      return;
+    }
   }
+  
+  /* Compute the relative vector and the distance */
+  double rij_x = x - tree->x;
+  double rij_y = y - tree->y;
+  double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
+  
+  /* Update the forces */
+  *force_x += (tree->m)/(dist*dist*dist)*rij_x;
+  *force_y += (tree->m)/(dist*dist*dist)*rij_y;
 } //*/
 
 
