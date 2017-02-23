@@ -26,6 +26,12 @@ double theta_max;
 double G;
 const double epsilon = 0.001;
 
+int N_threads;
+pthread_t *threads;
+double *busy_threads;
+int busy = 0;
+pthread_mutex_t mutex;
+pthread_cond_t cond;
 
 /* Define the quad_node struct */
 typedef struct quad_node {
@@ -38,6 +44,12 @@ typedef struct quad_node {
 	int size, index;
 } node_t;
 
+typedef struct thread_arg {
+	struct quad_node *root;
+	double x, y;
+	double m;
+	double vx, vy;
+} arg_t;
 
 /* Timings */
 double get_wall_seconds(){
@@ -116,8 +128,6 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		(*node)->x = (((*node)->x)*((*node)->m) + x*m)/(((*node)->m) + m);
 		(*node)->y = (((*node)->y)*((*node)->m) + y*m)/(((*node)->m) + m);
 		(*node)->m += m;
-		//(*node)->vx = 0;
-		//(*node)->vy = 0;
 		
 	/* If this is a cluster node */
 	} else {
@@ -189,23 +199,58 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
 			update_tree(root, tree->sw, new_tree);
 			update_tree(root, tree->se, new_tree);
   } else {
-		double force_x = 0;
-		double force_y = 0;
-  	force_function(root, root, tree->x, tree->y, tree->m, tree->vx, tree->vy,
-                   &force_x, &force_y);
+  	/* See if all threads are busy */
+  	while (busy) {  	
+  		pthread_mutex_lock(&mutex);
+  		pthread_cond_wait(&cond, &mutex);	
+  		pthread_mutex_lock(&mutex);
+  	}
+  	  	
+  	/* Look for unused threads */
+  	int index = -1;
+ 	 	for (int i = 0; i < N_threads; i++) {
+  		if (busy_threads[i] == 0) {
+  			index = i;
+  			break;
+  		}
+   	}
+   	 	
+   	/* Compute forces */
+  	arg_t thread_arg;
+  	thread_arg->root = root;
+  	thread_arg->x = tree->x;
+  	thread_arg->y = tree->y;
+  	thread_arg->m = tree->m;
+  	thread_arg->vx = tree->vx;
+  	thread_arg->vy = tree->vy;
   	
-  	/* Calculate velocities */
-		double vx = tree->vx - G*force_x*delta_t;
-		double vy = tree->vy - G*force_y*delta_t;
-     
-    /* Build the new tree */	
-  	insert(new_tree, 0.5, 0.5, root->width, tree->x + delta_t*vx,
-           tree->y + delta_t*vy, tree->m, vx, vy, tree->index);
+  	pthread_create(&(threads[index]), NULL, thread_force, thread_arg);
   }
 } //*/
 
 void* thread_force(void *arg) {
-
+	arg_t thread_arg = (arg_t)arg;
+	pthread_mutex_lock(&mutex);
+	busy_threads[thread_arg->index] = 1;
+  pthread_mutex_unlock(&mutex);         
+	
+	double force_x = 0;
+	double force_y = 0;
+	force_function(thread_arg->root, thread_arg->root, thread_arg->x, thread_arg->y, 
+								 thread_arg->m, thread_arg->vx, thread_arg->vy, &force_x, &force_y);
+  	
+  /* Calculate velocities */
+	double vx = thread_arg->vx - G*force_x*delta_t;
+	double vy = thread_arg->vy - G*force_y*delta_t;
+	
+	/* Build the new tree */	
+  pthread_mutex_lock(&mutex);
+  insert(new_tree, 0.5, 0.5, root->width, thread_arg->x + delta_t*vx,
+         thread_arg->y + delta_t*vy, thread_arg->m, vx, vy, tree->index);
+  busy = 0;
+  pthread_cond_signal(&cond);
+  pthread_mutex_unlock(&mutex);         
+	
 	return NULL;
 }
 
@@ -286,9 +331,7 @@ void do_graphics(node_t *tree, float L, float W, float radius, float circleColor
 
 
 /* Main method */
-int main(int argc, char *argv[]) {
-  printf("Size of struct: %lu\n", (long unsigned int)sizeof(struct quad_node));
-  
+int main(int argc, char *argv[]) {  
   /* Check for correct number of input arguments */
   if (argc != 8) {
     printf("Error: Expected exactly 7 input arguments.");
@@ -322,6 +365,8 @@ int main(int argc, char *argv[]) {
     insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
+  
+  pthread_mutex_init(&mutex);
     
   /* Setup graphics */
   const int windowWidth = 800;
