@@ -32,6 +32,7 @@ int *busy_threads;
 int busy = 0;
 pthread_mutex_t mutex;
 pthread_cond_t cond;
+pthread_attr_t attr;
 
 
 /* Define the quad_node struct */
@@ -213,13 +214,11 @@ void* thread_force(void *arg) {
   pthread_mutex_lock(&mutex);
   insert(thread_arg->new_tree, 0.5, 0.5, thread_arg->root->width, thread_arg->x + delta_t*vx,
          thread_arg->y + delta_t*vy, thread_arg->m, vx, vy, thread_arg->tree->index);
-  free(thread_arg);
   busy_threads[thread_arg->index] = 0;
   busy = 0;
+  free(thread_arg);
   pthread_mutex_unlock(&mutex);
   pthread_cond_signal(&cond);
-	
-  printf("Particle inserted\n");
   
 	return NULL;
 }
@@ -238,7 +237,6 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   } else {
   	/* See if all threads are busy */
     pthread_mutex_lock(&mutex);
-    printf("busy = %i\n", busy);
     busy = 1;
     for (int i = 0; i < N_threads; i++) {
       if (busy_threads[i] == 0) {
@@ -246,15 +244,16 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
         break;
       }
     }
-    pthread_mutex_unlock(&mutex);
+    //pthread_mutex_unlock(&mutex);
     
   	while (busy == 1) {
       printf("Main going to sleep.\n");
-  		pthread_mutex_lock(&mutex);
+  		//pthread_mutex_lock(&mutex);
   		pthread_cond_wait(&cond, &mutex);
-  		pthread_mutex_lock(&mutex);
+  		//pthread_mutex_unlock(&mutex);
       printf("Main waking up.\n");
   	}
+    //pthread_mutex_unlock(&mutex);
   	
   	/* Look for unused threads */
   	int index = -1;
@@ -264,8 +263,9 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   			break;
   		}
    	}
+    pthread_mutex_unlock(&mutex);
     
-   	/* Compute forces */
+   	/* Set input arguments */
   	arg_t* thread_arg = (arg_t*)malloc(sizeof(arg_t));
   	thread_arg->root = root;
   	thread_arg->tree = tree;
@@ -276,13 +276,16 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   	thread_arg->vx = tree->vx;
   	thread_arg->vy = tree->vy;
     thread_arg->index = index;
-  	pthread_create(&(threads[index]), NULL, thread_force, (void*)thread_arg);
-    printf("index = %i\n", index);
-    
+  	
     /* Set the status for the thread to busy */
   	pthread_mutex_lock(&mutex);
-  	busy_threads[thread_arg->index] = 1;
+  	busy_threads[index] = 1;
     pthread_mutex_unlock(&mutex);
+    
+    /* Update the particle with a new thread */
+    pthread_join(threads[index], NULL);
+    pthread_create(&(threads[index]), NULL, thread_force, (void*)thread_arg);
+    
   }
 } //*/
 
@@ -389,6 +392,8 @@ int main(int argc, char *argv[]) {
   pthread_mutex_init(&mutex, NULL);
   pthread_cond_init(&cond, NULL);
   busy_threads = (int*)calloc(N_threads, sizeof(int));
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -402,7 +407,7 @@ int main(int argc, char *argv[]) {
     insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
-    
+  
   /* Setup graphics */
   const int windowWidth = 600;
   const float L = 1;
@@ -417,8 +422,7 @@ int main(int argc, char *argv[]) {
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
     printf("k = %i\n", k);
-    /* Build the new tree by computing the new positions and
-    velocities */
+    /* Build the new tree by computing the new positions and velocities */
     update_tree(tree, tree, &new_tree);
     
     /* Wait for all threads to finish */
