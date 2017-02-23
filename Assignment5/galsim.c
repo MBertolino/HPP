@@ -247,11 +247,9 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
     //pthread_mutex_unlock(&mutex);
     
   	while (busy == 1) {
-      printf("Main going to sleep.\n");
   		//pthread_mutex_lock(&mutex);
   		pthread_cond_wait(&cond, &mutex);
   		//pthread_mutex_unlock(&mutex);
-      printf("Main waking up.\n");
   	}
     //pthread_mutex_unlock(&mutex);
   	
@@ -421,7 +419,6 @@ int main(int argc, char *argv[]) {
   
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
-    printf("k = %i\n", k);
     /* Build the new tree by computing the new positions and velocities */
     update_tree(tree, tree, &new_tree);
     
