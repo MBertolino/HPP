@@ -19,6 +19,13 @@
 #include <sys/time.h>
 
 
+/* Global variables */
+double delta_t;
+double theta_max;
+double G;
+const double epsilon = 0.001;
+
+
 /* Define the quad_node struct */
 typedef struct quad_node {
 	struct quad_node *nw, *ne, *sw, *se;
@@ -38,6 +45,7 @@ double get_wall_seconds(){
 	double seconds = tv.tv_sec + (double)tv.tv_usec/1000000;
 	return seconds;
 }
+
 
 /* Insert a new node */
 void insert(node_t **node, double origo_x, double origo_y, double width,
@@ -139,10 +147,9 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 } //*/
 
 
-/*  */
-void force_function(node_t *root, node_t *tree, double x, double y, double m, double vx, double vy, 
-										double *force_x, double *force_y, double theta_max,
-										double G, const double epsilon, double delta_t) {
+/* Compute the total force on a particle */
+void force_function(node_t *root, node_t *tree, double x, double y, double m,
+                    double vx, double vy, double *force_x, double *force_y) {
 	if (tree == NULL) return;
   
   /* First check if this is a leaf node */
@@ -152,14 +159,10 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
     
     if (theta > theta_max) {
       /* Traverse down the tree if the theta condition is not met */
-      force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-      force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-      force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
-      force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y,
-                     theta_max, G, epsilon, delta_t);
+      force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y);
+      force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y);
+      force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y);
+      force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y);
       return;
     }
   }
@@ -176,20 +179,19 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m, do
 
 
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
-void update_tree(node_t *root, node_t *tree, node_t **new_tree,
-                 double theta_max, double G, const double epsilon, double delta_t) {
+void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   if (tree == NULL) return;
   
   if (tree->size != 1) {
-			update_tree(root, tree->nw, new_tree, theta_max, G, epsilon, delta_t);
-			update_tree(root, tree->ne, new_tree, theta_max, G, epsilon, delta_t);
-			update_tree(root, tree->sw, new_tree, theta_max, G, epsilon, delta_t);
-			update_tree(root, tree->se, new_tree, theta_max, G, epsilon, delta_t);
+			update_tree(root, tree->nw, new_tree);
+			update_tree(root, tree->ne, new_tree);
+			update_tree(root, tree->sw, new_tree);
+			update_tree(root, tree->se, new_tree);
   } else {
 		double force_x = 0;
 		double force_y = 0;
   	force_function(root, root, tree->x, tree->y, tree->m, tree->vx, tree->vy,
-                   &force_x, &force_y, theta_max, G, epsilon, delta_t);
+                   &force_x, &force_y);
   	
   	/* Calculate velocities */
 		double vx = tree->vx - G*force_x*delta_t;
@@ -292,14 +294,12 @@ int main(int argc, char *argv[]) {
   int N = atoi(argv[1]);
   char *filename = argv[2];
   unsigned int nsteps = atoi(argv[3]);
-  double delta_t = atof(argv[4]);
-  double theta_max = atof(argv[5]);
+  delta_t = atof(argv[4]);
+  theta_max = atof(argv[5]);
   int graphics = atoi(argv[6]);
-
   
-  /* Constants */
-  double G = 100/(double)N;
-  const double epsilon = 0.001;
+  /* Gravitational constant */
+  G = 100/(double)N;
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
   for (int k = 0; k < nsteps; k++) {
     /* Build the new tree by computing the new positions and
     velocities */
-    update_tree(tree, tree, &new_tree, theta_max, G, epsilon, delta_t);
+    update_tree(tree, tree, &new_tree);
         
     /* Clear the old tree */
     free_tree(&tree);
