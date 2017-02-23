@@ -17,6 +17,7 @@
 #include <math.h>
 #include <unistd.h> // Sleep function
 #include <sys/time.h>
+#include <pthread.h>
 
 
 /* Global variables */
@@ -203,6 +204,10 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   }
 } //*/
 
+void* thread_force(void *arg) {
+
+	return NULL;
+}
 
 /* Print the tree */
 void print_tree(node_t *tree, int nSpaces) {
@@ -285,7 +290,7 @@ int main(int argc, char *argv[]) {
   printf("Size of struct: %lu\n", (long unsigned int)sizeof(struct quad_node));
   
   /* Check for correct number of input arguments */
-  if (argc != 7) {
+  if (argc != 8) {
     printf("Error: Expected exactly 6 input arguments.");
     return -1;
   }
@@ -297,6 +302,10 @@ int main(int argc, char *argv[]) {
   delta_t = atof(argv[4]);
   theta_max = atof(argv[5]);
   int graphics = atoi(argv[6]);
+  int N_threads = atoi(argv[7]);
+  pthread_t *threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
+	
+	if (threads[0] == 0); //All warnings treated as error...
   
   /* Gravitational constant */
   G = 100/(double)N;
@@ -313,11 +322,7 @@ int main(int argc, char *argv[]) {
     insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
-  
-  /* Print the initial tree *
-  printf("Initial tree:\n");
-  print_tree(tree, 0); //*/
-  
+    
   /* Setup graphics */
   const int windowWidth = 800;
   const float L = 1;
