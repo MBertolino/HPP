@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
   
   /* Check for correct number of input arguments */
   if (argc != 8) {
-    printf("Error: Expected exactly 6 input arguments.");
+    printf("Error: Expected exactly 7 input arguments.");
     return -1;
   }
     
