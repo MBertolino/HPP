@@ -1,0 +1,161 @@
+desc: --time-unit=B
+cmd: ./galsim 1000 input_data/ellipse_N_01000.gal 200 1e-5 0
+time_unit: B
+#-----------
+snapshot=0
+#-----------
+time=0
+mem_heap_B=0
+mem_heap_extra_B=0
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=1
+#-----------
+time=40008
+mem_heap_B=40000
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=2
+#-----------
+time=48016
+mem_heap_B=48000
+mem_heap_extra_B=16
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=3
+#-----------
+time=56024
+mem_heap_B=56000
+mem_heap_extra_B=24
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=4
+#-----------
+time=96032
+mem_heap_B=96000
+mem_heap_extra_B=32
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=5
+#-----------
+time=96600
+mem_heap_B=96552
+mem_heap_extra_B=48
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=6
+#-----------
+time=100704
+mem_heap_B=100648
+mem_heap_extra_B=56
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=7
+#-----------
+time=100704
+mem_heap_B=100648
+mem_heap_extra_B=56
+mem_stacks_B=0
+heap_tree=peak
+n6: 100648 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n0: 40000 0x4012DA: main (in /home/mbertolino/Desktop/Studier/Teknisk Fysik/4/Högprestandaprogrammering/Assignments/Assignment3/galsim)
+ n0: 40000 0x401300: main (in /home/mbertolino/Desktop/Studier/Teknisk Fysik/4/Högprestandaprogrammering/Assignments/Assignment3/galsim)
+ n0: 8000 0x4012E5: main (in /home/mbertolino/Desktop/Studier/Teknisk Fysik/4/Högprestandaprogrammering/Assignments/Assignment3/galsim)
+ n0: 8000 0x4012F0: main (in /home/mbertolino/Desktop/Studier/Teknisk Fysik/4/Högprestandaprogrammering/Assignments/Assignment3/galsim)
+ n1: 4096 0x51D8183: _IO_file_doallocate (filedoalloc.c:127)
+  n1: 4096 0x51E64C2: _IO_doallocbuf (genops.c:398)
+   n1: 4096 0x51E3531: _IO_file_seekoff@@GLIBC_2.2.5 (fileops.c:1023)
+    n1: 4096 0x51E0EB7: fseek (fseek.c:36)
+     n1: 4096 0x401880: read_doubles_from_file (in /home/mbertolino/Desktop/Studier/Teknisk Fysik/4/Högprestandaprogrammering/Assignments/Assignment3/galsim)
+      n0: 4096 0x401316: main (in /home/mbertolino/Desktop/Studier/Teknisk Fysik/4/Högprestandaprogrammering/Assignments/Assignment3/galsim)
+ n0: 552 in 1 place, below massif's threshold (1.00%)
+#-----------
+snapshot=8
+#-----------
+time=104808
+mem_heap_B=96552
+mem_heap_extra_B=48
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=9
+#-----------
+time=105376
+mem_heap_B=96000
+mem_heap_extra_B=32
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=10
+#-----------
+time=105944
+mem_heap_B=96552
+mem_heap_extra_B=48
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=11
+#-----------
+time=110048
+mem_heap_B=100648
+mem_heap_extra_B=56
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=12
+#-----------
+time=114152
+mem_heap_B=96552
+mem_heap_extra_B=48
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=13
+#-----------
+time=114720
+mem_heap_B=96000
+mem_heap_extra_B=32
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=14
+#-----------
+time=154728
+mem_heap_B=56000
+mem_heap_extra_B=24
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=15
+#-----------
+time=194736
+mem_heap_B=16000
+mem_heap_extra_B=16
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=16
+#-----------
+time=202744
+mem_heap_B=8000
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=17
+#-----------
+time=210752
+mem_heap_B=0
+mem_heap_extra_B=0
+mem_stacks_B=0
+heap_tree=detailed
+n1: 0 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n0: 0 in 6 places, all below massif's threshold (1.00%)
