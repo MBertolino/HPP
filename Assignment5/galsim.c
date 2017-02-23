@@ -33,6 +33,7 @@ int busy = 0;
 pthread_mutex_t mutex;
 pthread_cond_t cond;
 
+
 /* Define the quad_node struct */
 typedef struct quad_node {
 	struct quad_node *nw, *ne, *sw, *se;
@@ -44,12 +45,15 @@ typedef struct quad_node {
 	int size, index;
 } node_t;
 
+
+/* Define the input struct for the thread function */
 typedef struct thread_arg {
 	struct quad_node *root;
 	double x, y;
 	double m;
 	double vx, vy;
 } arg_t;
+
 
 /* Timings */
 double get_wall_seconds(){
@@ -228,12 +232,17 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   }
 } //*/
 
+
+/* The thread function to comptue the force for one particle */
 void* thread_force(void *arg) {
 	arg_t thread_arg = (arg_t)arg;
+  
+  /* Set the status for this thread to busy */
 	pthread_mutex_lock(&mutex);
 	busy_threads[thread_arg->index] = 1;
   pthread_mutex_unlock(&mutex);         
 	
+  /* Compute the force */
 	double force_x = 0;
 	double force_y = 0;
 	force_function(thread_arg->root, thread_arg->root, thread_arg->x, thread_arg->y, 
@@ -253,6 +262,7 @@ void* thread_force(void *arg) {
 	
 	return NULL;
 }
+
 
 /* Print the tree */
 void print_tree(node_t *tree, int nSpaces) {
@@ -331,13 +341,14 @@ void do_graphics(node_t *tree, float L, float W, float radius, float circleColor
 
 
 /* Main method */
-int main(int argc, char *argv[]) {  
+int main(int argc, char *argv[]) {
+  
   /* Check for correct number of input arguments */
   if (argc != 8) {
     printf("Error: Expected exactly 7 input arguments.");
     return -1;
   }
-    
+  
   /* Input variables */
   int N = atoi(argv[1]);
   char *filename = argv[2];
@@ -346,12 +357,15 @@ int main(int argc, char *argv[]) {
   theta_max = atof(argv[5]);
   int graphics = atoi(argv[6]);
   int N_threads = atoi(argv[7]);
-  pthread_t *threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
-	
-	if (threads[0] == 0); //All warnings treated as error...
   
   /* Gravitational constant */
   G = 100/(double)N;
+  
+  /* Initialize pthread variables */
+  pthread_mutex_init(&mutex, NULL);
+  pthread_cond_init(&cond, NULL);
+  pthread_t *threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
+  int* busy_threads = (int*)calloc(N_threads*sizeof(int));
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -365,8 +379,6 @@ int main(int argc, char *argv[]) {
     insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
            data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
   }
-  
-  pthread_mutex_init(&mutex);
     
   /* Setup graphics */
   const int windowWidth = 800;
@@ -416,6 +428,10 @@ int main(int argc, char *argv[]) {
   /* Free memory */
 	free_tree(&tree);
 	free(data);
+  free(threads);
+  free(busy_threads);
+  pthread_mutex_destroy(&mutex);
+  pthread_cond_destroy(&cond);
   
   return 0;
 }
