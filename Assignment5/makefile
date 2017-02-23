@@ -22,4 +22,4 @@ galsim.o: galsim.c file_operations/file_operations.h graphics/graphics.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c galsim.c -std=c99
 
 clean:
-	$(RM) $(EXECUTABLE) *.o
+	$(RM) $(EXECUTABLE) *.o result.gal
