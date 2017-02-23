@@ -28,7 +28,7 @@ const double epsilon = 0.001;
 
 int N_threads;
 pthread_t *threads;
-double *busy_threads;
+int *busy_threads;
 int busy = 0;
 pthread_mutex_t mutex;
 pthread_cond_t cond;
@@ -48,10 +48,12 @@ typedef struct quad_node {
 
 /* Define the input struct for the thread function */
 typedef struct thread_arg {
-	struct quad_node *root;
+	struct quad_node *root, *tree;
+  struct quad_node **new_tree;
 	double x, y;
 	double m;
 	double vx, vy;
+  int index;
 } arg_t;
 
 
@@ -193,6 +195,33 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m,
 } //*/
 
 
+/* The thread function to comptue the force for one particle */
+void* thread_force(void *arg) {
+	arg_t *thread_arg = (arg_t*)arg;
+	
+  /* Compute the force */
+	double force_x = 0;
+	double force_y = 0;
+	force_function(thread_arg->root, thread_arg->root, thread_arg->x, thread_arg->y, 
+								 thread_arg->m, thread_arg->vx, thread_arg->vy, &force_x, &force_y);
+  	
+  /* Calculate velocities */
+	double vx = thread_arg->vx - G*force_x*delta_t;
+	double vy = thread_arg->vy - G*force_y*delta_t;
+	
+	/* Build the new tree */
+  pthread_mutex_lock(&mutex);
+  insert(thread_arg->new_tree, 0.5, 0.5, thread_arg->root->width, thread_arg->x + delta_t*vx,
+         thread_arg->y + delta_t*vy, thread_arg->m, vx, vy, thread_arg->tree->index);
+  busy_threads[thread_arg->index] = 0;
+  busy = 0;
+  pthread_cond_signal(&cond);
+  pthread_mutex_unlock(&mutex);
+	
+	return NULL;
+}
+
+
 /* Copy leaf node particle attributes, update the copied attributes and build a new */
 void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   if (tree == NULL) return;
@@ -206,10 +235,10 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   	/* See if all threads are busy */
   	while (busy) {  	
   		pthread_mutex_lock(&mutex);
-  		pthread_cond_wait(&cond, &mutex);	
+  		pthread_cond_wait(&cond, &mutex);
   		pthread_mutex_lock(&mutex);
   	}
-  	  	
+  	
   	/* Look for unused threads */
   	int index = -1;
  	 	for (int i = 0; i < N_threads; i++) {
@@ -218,50 +247,31 @@ void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
   			break;
   		}
    	}
-   	 	
+    if (index == N_threads) {
+      pthread_mutex_lock(&mutex);
+      busy = 1;
+      pthread_mutex_unlock(&mutex);
+    }
+    
    	/* Compute forces */
-  	arg_t thread_arg;
+  	arg_t* thread_arg = (arg_t*)malloc(sizeof(arg_t));
   	thread_arg->root = root;
+  	thread_arg->tree = tree;
+  	thread_arg->new_tree = new_tree;
   	thread_arg->x = tree->x;
   	thread_arg->y = tree->y;
   	thread_arg->m = tree->m;
   	thread_arg->vx = tree->vx;
   	thread_arg->vy = tree->vy;
-  	
-  	pthread_create(&(threads[index]), NULL, thread_force, thread_arg);
+    thread_arg->index = index;
+  	pthread_create(&(threads[index]), NULL, thread_force, (void*)thread_arg);
+    
+    /* Set the status for the thread to busy */
+  	pthread_mutex_lock(&mutex);
+  	busy_threads[thread_arg->index] = 1;
+    pthread_mutex_unlock(&mutex);
   }
 } //*/
-
-
-/* The thread function to comptue the force for one particle */
-void* thread_force(void *arg) {
-	arg_t thread_arg = (arg_t)arg;
-  
-  /* Set the status for this thread to busy */
-	pthread_mutex_lock(&mutex);
-	busy_threads[thread_arg->index] = 1;
-  pthread_mutex_unlock(&mutex);         
-	
-  /* Compute the force */
-	double force_x = 0;
-	double force_y = 0;
-	force_function(thread_arg->root, thread_arg->root, thread_arg->x, thread_arg->y, 
-								 thread_arg->m, thread_arg->vx, thread_arg->vy, &force_x, &force_y);
-  	
-  /* Calculate velocities */
-	double vx = thread_arg->vx - G*force_x*delta_t;
-	double vy = thread_arg->vy - G*force_y*delta_t;
-	
-	/* Build the new tree */	
-  pthread_mutex_lock(&mutex);
-  insert(new_tree, 0.5, 0.5, root->width, thread_arg->x + delta_t*vx,
-         thread_arg->y + delta_t*vy, thread_arg->m, vx, vy, tree->index);
-  busy = 0;
-  pthread_cond_signal(&cond);
-  pthread_mutex_unlock(&mutex);         
-	
-	return NULL;
-}
 
 
 /* Print the tree */
@@ -356,16 +366,16 @@ int main(int argc, char *argv[]) {
   delta_t = atof(argv[4]);
   theta_max = atof(argv[5]);
   int graphics = atoi(argv[6]);
-  int N_threads = atoi(argv[7]);
+  N_threads = atoi(argv[7]);
   
   /* Gravitational constant */
   G = 100/(double)N;
   
   /* Initialize pthread variables */
+  threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
   pthread_mutex_init(&mutex, NULL);
   pthread_cond_init(&cond, NULL);
-  pthread_t *threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
-  int* busy_threads = (int*)calloc(N_threads*sizeof(int));
+  busy_threads = (int*)calloc(N_threads, sizeof(int));
   
   /* Read file */
   double *data = (double*)malloc(N*5*sizeof(double));
@@ -396,7 +406,12 @@ int main(int argc, char *argv[]) {
     /* Build the new tree by computing the new positions and
     velocities */
     update_tree(tree, tree, &new_tree);
-        
+    
+    /* Wait for all threads to finish */
+    for (int i = 0; i < N_threads; i++) {
+      pthread_join(threads[i], NULL);
+    }
+    
     /* Clear the old tree */
     free_tree(&tree);
     tree = NULL;
