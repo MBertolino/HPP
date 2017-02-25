@@ -36,13 +36,10 @@ int N_threads;
 
 /* Define the input struct for the thread function */
 typedef struct thread_arg {
-	struct quad_node *root, *tree;
-  struct quad_node **new_tree;
-	double x, y;
-	double m;
-	double vx, vy;
-  int index;
+	int from;
+  int to;
 } arg_t;
+arg_t* args;
 
 
 /* Timings */
@@ -183,39 +180,14 @@ void force_function(node_t *tree, double x, double y, double m,
 } //*/
 
 
-/* The thread function to comptue the force for one particle *
-void* thread_force(void *arg) {
+/* The thread function to comptue the force some particles */
+void* thread_func(void *arg) {
 	arg_t *thread_arg = (arg_t*)arg;
-	
-  // Compute the force
-	double force_x = 0;
-	double force_y = 0;
-	force_function(thread_arg->root, thread_arg->root, thread_arg->x, thread_arg->y, 
-								 thread_arg->m, thread_arg->vx, thread_arg->vy, &force_x, &force_y);
-  
-  // Calculate velocities
-	double vx = thread_arg->vx - G*force_x*delta_t;
-	double vy = thread_arg->vy - G*force_y*delta_t;
-	
-	// Build the new tree
-  pthread_mutex_lock(&mutex);
-  insert(thread_arg->new_tree, 0.5, 0.5, thread_arg->root->width, thread_arg->x + delta_t*vx,
-         thread_arg->y + delta_t*vy, thread_arg->m, vx, vy, thread_arg->tree->index);
-  busy_threads[thread_arg->index] = 0;
-  busy = 0;
-  free(thread_arg);
-  pthread_mutex_unlock(&mutex);
-  pthread_cond_signal(&cond);
-  
-	return NULL;
-} //*/
-
-
-/* Update the array of particles using the tree */
-void update_array() {
+	int from = thread_arg->from;
+	int to = thread_arg->to;
   
   // Loop through the particles
-  for (int i = 0; i < N; i++) {
+  for (int i = from; i <= to; i++) {
     
     // Compute the force
 	  double force_x = 0;
@@ -232,10 +204,23 @@ void update_array() {
     data[5*i + 1] += delta_t*vy;
     data[5*i + 3] = vx;
     data[5*i + 4] = vy;
-    
-	  /* Build the new tree *
-    insert(&tree, 0.5, 0.5, tree->width, data[5*i] + delta_t*vx,
-           data[5*i + 1] + delta_t*vy, data[5*i + 2], vx, vy, i); */
+  }
+  
+	return NULL;
+} //*/
+
+
+/* Update the array of particles using the tree */
+void update_array() {
+  
+  // Create the threads
+  for (int i = 0; i < N_threads; i++) {
+    pthread_create(&threads[i], NULL, thread_func, args[i]);
+  }
+  
+  // Wait for the threads to finish
+  for (int i = 0; i < N_threads; i++) {
+    pthread_join(threads(i), NULL);
   }
 } //*/
 
@@ -320,7 +305,7 @@ int main(int argc, char *argv[]) {
   G = 100/(double)N;
   
   // Initialize the pthreads
-  //threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
+  threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
   
   // Read file
   data = (double*)malloc(N*5*sizeof(double));
@@ -350,7 +335,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Update particles (using force_function)
-    update_array();   
+    update_array();
     
     // Do graphics
     if (graphics) {
