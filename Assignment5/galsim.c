@@ -29,17 +29,9 @@ double G;
 const double epsilon = 0.001;
 double* data;
 node_t* tree;
-
 int N_threads;
-//pthread_t *threads;
-
-
-/* Define the input struct for the thread function */
-typedef struct thread_arg {
-	int from;
-  int to;
-} arg_t;
-arg_t* args;
+pthread_t* threads;
+arg_t** args;
 
 
 /* Timings */
@@ -212,7 +204,6 @@ void* thread_func(void *arg) {
 
 /* Update the array of particles using the tree */
 void update_array() {
-  
   // Create the threads
   for (int i = 0; i < N_threads; i++) {
     pthread_create(&threads[i], NULL, thread_func, args[i]);
@@ -220,7 +211,7 @@ void update_array() {
   
   // Wait for the threads to finish
   for (int i = 0; i < N_threads; i++) {
-    pthread_join(threads(i), NULL);
+    pthread_join(threads[i], NULL);
   }
 } //*/
 
@@ -304,8 +295,16 @@ int main(int argc, char *argv[]) {
   // Gravitational constant
   G = 100/(double)N;
   
-  // Initialize the pthreads
+  // Allocate thread variables
   threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
+  args = (arg_t**)malloc(N_threads*sizeof(arg_t*));
+  
+  // Set thread indicies
+  for (int i = 0; i < N_threads; i++) {
+    args[i] = (arg_t*)malloc(sizeof(arg_t));
+    (args[i])->from = i*N/N_threads;
+    (args[i])->to = (i+1)*N/N_threads - 1;
+  }
   
   // Read file
   data = (double*)malloc(N*5*sizeof(double));
@@ -315,7 +314,7 @@ int main(int argc, char *argv[]) {
   tree = NULL;
   
   // Setup graphics
-  const int windowWidth = 800;
+  const int windowWidth = 600;
   const float L = 1;
   const float W = 1;
   const float radius = 0.002*L;

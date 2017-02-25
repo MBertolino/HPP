@@ -17,3 +17,10 @@ typedef struct quad_node {
   double vx, vy;
   int size, index;
 } node_t;
+
+/* Define the input struct for the thread function */
+typedef struct thread_arg {
+	int from;
+  int to;
+} arg_t;
+
