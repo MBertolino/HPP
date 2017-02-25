@@ -18,6 +18,7 @@
 #include <unistd.h> // Sleep function
 #include <sys/time.h>
 #include <pthread.h>
+#include "structs.h"
 
 
 /* Global variables */
@@ -27,32 +28,10 @@ double theta_max;
 double G;
 const double epsilon = 0.001;
 double* data;
+node_t* tree;
 
 int N_threads;
 //pthread_t *threads;
-
-
-/* Define the particle struct *
-typedef struct particle {
-  double x;
-  double y;
-  double m;
-  double vv;
-  double vy;
-} particle_t; //*/
-
-
-/* Define the quad_node struct */
-typedef struct quad_node {
-  struct quad_node *nw, *ne, *sw, *se;
-  double origo_x, origo_y;
-  double width;
-  double x, y;
-  double m;
-  double vx, vy;
-  int size, index;
-} node_t;
-node_t* tree;
 
 
 /* Define the input struct for the thread function */
@@ -76,7 +55,7 @@ double get_wall_seconds() {
 void insert(node_t **node, double origo_x, double origo_y, double width,
 						double x, double y, double m, double vx, double vy, int index) {
 	
-	/* If null, this is a leaf node */
+	// If null, this is a leaf node
 	if ((*node) == NULL) {
 		*node = (node_t*)malloc(sizeof(node_t));
 		(*node)->origo_x = origo_x;
@@ -94,10 +73,10 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 		(*node)->sw = NULL;
 		(*node)->se = NULL;
 	
-	/* If this is a leaf node, split the node */
+	// If this is a leaf node, split the node
 	} else if ((*node)->size == 1) {
 		
-		/* Add previous particle */
+		// Add previous particle
 		if ((*node)->x < (*node)->origo_x) {
 			if ((*node)->y < (*node)->origo_y) // South West
 				insert(&((*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
@@ -118,7 +97,7 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
                (*node)->index);
 		}
 		
-		/* Add new particle */
+		// Add new particle
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
 				insert(&((*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
@@ -135,16 +114,16 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
                x, y, m, vx, vy, index);
 		}
 		
-		/* Update this nodes properties */
+		// Update this nodes properties
     (*node)->size += 1;
 		(*node)->x = (((*node)->x)*((*node)->m) + x*m)/(((*node)->m) + m);
 		(*node)->y = (((*node)->y)*((*node)->m) + y*m)/(((*node)->m) + m);
 		(*node)->m += m;
 		
-	/* If this is a cluster node */
+	// If this is a cluster node
 	} else {
 		
-		/* Add new particle */
+		// Add new particle
 		if (x < (*node)->origo_x) {
 			if (y < (*node)->origo_y) // South West
 				insert(&((*node)->sw), origo_x - width/4, origo_y - width/4, width/2,
@@ -161,7 +140,7 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
                x, y, m, vx, vy, index);
 		}
 		
-		/* Update this nodes properties */
+	  // Update this nodes properties
     (*node)->size += 1;
 		(*node)->x = (((*node)->x)*((*node)->m) + x*m)/(((*node)->m) + m);
 		(*node)->y = (((*node)->y)*((*node)->m) + y*m)/(((*node)->m) + m);
@@ -175,13 +154,13 @@ void force_function(node_t *tree, double x, double y, double m,
                     double vx, double vy, double *force_x, double *force_y) {
 	if (tree == NULL) return;
   
-  /* First check if this is a leaf node */
+  // First check if this is a leaf node
   if (tree->size != 1) {
     double theta = (tree->width)/(sqrt((x-tree->x)*(x-tree->x) +
                    (y-tree->y)*(y-tree->y)));
     
     if (theta > theta_max) {
-      /* Traverse down the tree if the theta condition is not met */
+      // Traverse down the tree if the theta condition is not met
       force_function(tree->nw, x, y, m, vx, vy, force_x, force_y);
       force_function(tree->ne, x, y, m, vx, vy, force_x, force_y);
       force_function(tree->sw, x, y, m, vx, vy, force_x, force_y);
@@ -190,12 +169,12 @@ void force_function(node_t *tree, double x, double y, double m,
     }
   }
   
-  /* Compute the relative vector and the distance */
+  // Compute the relative vector and the distance
   double rij_x = x - tree->x;
   double rij_y = y - tree->y;
   double dist = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
   
-  /* Update the forces */
+  // Update the forces
   *force_x += (tree->m)/(dist*dist*dist)*rij_x;
   *force_y += (tree->m)/(dist*dist*dist)*rij_y;
 } //*/
@@ -273,7 +252,7 @@ void print_tree(node_t *tree, int nSpaces) {
 }
 
 
-/* Recursively freez the treez */
+// Recursively freez the treez */
 void free_tree(node_t **tree) {
 	if(*tree) {
 		free_tree(&((*tree)->nw));
@@ -285,7 +264,7 @@ void free_tree(node_t **tree) {
 }
 
 
-/* Draw the particles into the window */
+// Draw the particles into the window
 void do_graphics(node_t *tree, float L, float W, float radius, float circleColor) {
   
   if (tree == NULL) return;
@@ -307,13 +286,13 @@ void do_graphics(node_t *tree, float L, float W, float radius, float circleColor
 /* Main method */
 int main(int argc, char *argv[]) {
   
-  /* Check for correct number of input arguments */
+  // Check for correct number of input arguments
   if (argc != 8) {
     printf("Error: Expected exactly 7 input arguments.");
     return -1;
   }
   
-  /* Input variables */
+  // Input variables
   N = atoi(argv[1]);
   char *filename = argv[2];
   unsigned int nsteps = atoi(argv[3]);
@@ -322,20 +301,20 @@ int main(int argc, char *argv[]) {
   int graphics = atoi(argv[6]);
   N_threads = atoi(argv[7]);
   
-  /* Gravitational constant */
+  // Gravitational constant
   G = 100/(double)N;
   
-  /* Initialize the pthreads */
+  // Initialize the pthreads
   threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
   
-  /* Read file */
+  // Read file
   data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
   
-  /* Build the first tree */
+  // Build the first tree
   tree = NULL;
   
-  /* Setup graphics */
+  // Setup graphics
   const int windowWidth = 800;
   const float L = 1;
   const float W = 1;
