@@ -21,18 +21,25 @@
 
 
 /* Global variables */
+int N;
 double delta_t;
 double theta_max;
 double G;
 const double epsilon = 0.001;
+double* data;
 
 int N_threads;
-pthread_t *threads;
-int *busy_threads;
-int busy = 0;
-pthread_mutex_t mutex;
-pthread_cond_t cond;
-pthread_attr_t attr;
+//pthread_t *threads;
+
+
+/* Define the particle struct *
+typedef struct particle {
+  double x;
+  double y;
+  double m;
+  double vv;
+  double vy;
+} particle_t; //*/
 
 
 /* Define the quad_node struct */
@@ -45,6 +52,7 @@ typedef struct quad_node {
   double vx, vy;
   int size, index;
 } node_t;
+node_t* tree;
 
 
 /* Define the input struct for the thread function */
@@ -59,7 +67,7 @@ typedef struct thread_arg {
 
 
 /* Timings */
-double get_wall_seconds(){
+double get_wall_seconds() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	double seconds = tv.tv_sec + (double)tv.tv_usec/1000000;
@@ -166,7 +174,7 @@ void insert(node_t **node, double origo_x, double origo_y, double width,
 
 
 /* Compute the total force on a particle */
-void force_function(node_t *root, node_t *tree, double x, double y, double m,
+void force_function(node_t *tree, double x, double y, double m,
                     double vx, double vy, double *force_x, double *force_y) {
 	if (tree == NULL) return;
   
@@ -177,10 +185,10 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m,
     
     if (theta > theta_max) {
       /* Traverse down the tree if the theta condition is not met */
-      force_function(root, tree->nw, x, y, m, vx, vy, force_x, force_y);
-      force_function(root, tree->ne, x, y, m, vx, vy, force_x, force_y);
-      force_function(root, tree->sw, x, y, m, vx, vy, force_x, force_y);
-      force_function(root, tree->se, x, y, m, vx, vy, force_x, force_y);
+      force_function(tree->nw, x, y, m, vx, vy, force_x, force_y);
+      force_function(tree->ne, x, y, m, vx, vy, force_x, force_y);
+      force_function(tree->sw, x, y, m, vx, vy, force_x, force_y);
+      force_function(tree->se, x, y, m, vx, vy, force_x, force_y);
       return;
     }
   }
@@ -196,21 +204,21 @@ void force_function(node_t *root, node_t *tree, double x, double y, double m,
 } //*/
 
 
-/* The thread function to comptue the force for one particle */
+/* The thread function to comptue the force for one particle *
 void* thread_force(void *arg) {
 	arg_t *thread_arg = (arg_t*)arg;
 	
-  /* Compute the force */
+  // Compute the force
 	double force_x = 0;
 	double force_y = 0;
 	force_function(thread_arg->root, thread_arg->root, thread_arg->x, thread_arg->y, 
 								 thread_arg->m, thread_arg->vx, thread_arg->vy, &force_x, &force_y);
   
-  /* Calculate velocities */
+  // Calculate velocities
 	double vx = thread_arg->vx - G*force_x*delta_t;
 	double vy = thread_arg->vy - G*force_y*delta_t;
 	
-	/* Build the new tree */
+	// Build the new tree
   pthread_mutex_lock(&mutex);
   insert(thread_arg->new_tree, 0.5, 0.5, thread_arg->root->width, thread_arg->x + delta_t*vx,
          thread_arg->y + delta_t*vy, thread_arg->m, vx, vy, thread_arg->tree->index);
@@ -221,69 +229,34 @@ void* thread_force(void *arg) {
   pthread_cond_signal(&cond);
   
 	return NULL;
-}
+} //*/
 
 
-/* Copy leaf node particle attributes, update the copied attributes and build a new */
-void update_tree(node_t *root, node_t *tree, node_t **new_tree) {
-  if (tree == NULL) return;
+/* Update the array of particles using the tree */
+void update_array() {
   
-  if (tree->size != 1) {
-			update_tree(root, tree->nw, new_tree);
-			update_tree(root, tree->ne, new_tree);
-			update_tree(root, tree->sw, new_tree);
-			update_tree(root, tree->se, new_tree);
+  // Loop through the particles
+  for (int i = 0; i < N; i++) {
     
-  } else {
-  	/* See if all threads are busy */
-    pthread_mutex_lock(&mutex);
-    busy = 1;
-    for (int i = 0; i < N_threads; i++) {
-      if (busy_threads[i] == 0) {
-        busy = 0;
-        break;
-      }
-    }
-    //pthread_mutex_unlock(&mutex);
+    // Compute the force
+	  double force_x = 0;
+	  double force_y = 0;
+	  force_function(tree, data[5*i], data[5*i + 1], data[5*i + 2], data[5*i + 3],
+                   data[5*i + 4], &force_x, &force_y);
     
-  	while (busy == 1) {
-  		//pthread_mutex_lock(&mutex);
-  		pthread_cond_wait(&cond, &mutex);
-  		//pthread_mutex_unlock(&mutex);
-  	}
-    //pthread_mutex_unlock(&mutex);
+    // Calculate velocities
+	  double vx = data[5*i + 3] - G*force_x*delta_t;
+	  double vy = data[5*i + 4] - G*force_y*delta_t;
   	
-  	/* Look for unused threads */
-  	int index = -1;
- 	 	for (int i = 0; i < N_threads; i++) {
-  		if (busy_threads[i] == 0) {
-  			index = i;
-  			break;
-  		}
-   	}
-    pthread_mutex_unlock(&mutex);
+    // Update values
+    data[5*i] += delta_t*vx;
+    data[5*i + 1] += delta_t*vy;
+    data[5*i + 3] = vx;
+    data[5*i + 4] = vy;
     
-   	/* Set input arguments */
-  	arg_t* thread_arg = (arg_t*)malloc(sizeof(arg_t));
-  	thread_arg->root = root;
-  	thread_arg->tree = tree;
-  	thread_arg->new_tree = new_tree;
-  	thread_arg->x = tree->x;
-  	thread_arg->y = tree->y;
-  	thread_arg->m = tree->m;
-  	thread_arg->vx = tree->vx;
-  	thread_arg->vy = tree->vy;
-    thread_arg->index = index;
-  	
-    /* Set the status for the thread to busy */
-  	pthread_mutex_lock(&mutex);
-  	busy_threads[index] = 1;
-    pthread_mutex_unlock(&mutex);
-    
-    /* Update the particle with a new thread */
-    pthread_join(threads[index], NULL);
-    pthread_create(&(threads[index]), NULL, thread_force, (void*)thread_arg);
-    
+	  /* Build the new tree *
+    insert(&tree, 0.5, 0.5, tree->width, data[5*i] + delta_t*vx,
+           data[5*i + 1] + delta_t*vy, data[5*i + 2], vx, vy, i); */
   }
 } //*/
 
@@ -315,25 +288,6 @@ void print_tree(node_t *tree, int nSpaces) {
 }
 
 
-/* Recursively write the tree into a file */
-void write_tree(node_t *tree, double **data) {
-  if (tree == NULL) {
-    return;
-  } else if (tree->size == 1) {
-    (*data)[5*tree->index] = tree->x;
-    (*data)[5*tree->index + 1] = tree->y;
-    (*data)[5*tree->index + 2] = tree->m;
-    (*data)[5*tree->index + 3] = tree->vx;
-    (*data)[5*tree->index + 4] = tree->vy;
-  } else {
-    write_tree(tree->nw, data);
-    write_tree(tree->ne, data);
-    write_tree(tree->sw, data);
-    write_tree(tree->se, data);
-  }
-}
-
-
 /* Recursively freez the treez */
 void free_tree(node_t **tree) {
 	if(*tree) {
@@ -348,10 +302,11 @@ void free_tree(node_t **tree) {
 
 /* Draw the particles into the window */
 void do_graphics(node_t *tree, float L, float W, float radius, float circleColor) {
+  
   if (tree == NULL) return;
   DrawRectangle(tree->origo_x - (tree->width)/2,
                 tree->origo_y - (tree->width)/2,
-                W, L, tree->width, tree->width, circleColor + 0.8);
+                W, L, tree->width, tree->width, 0.8);
   
   if (tree->size == 1) {
     DrawCircle(tree->x, tree->y, L, W, radius, circleColor);
@@ -374,7 +329,7 @@ int main(int argc, char *argv[]) {
   }
   
   /* Input variables */
-  int N = atoi(argv[1]);
+  N = atoi(argv[1]);
   char *filename = argv[2];
   unsigned int nsteps = atoi(argv[3]);
   delta_t = atof(argv[4]);
@@ -385,29 +340,18 @@ int main(int argc, char *argv[]) {
   /* Gravitational constant */
   G = 100/(double)N;
   
-  /* Initialize pthread variables */
-  threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
-  pthread_mutex_init(&mutex, NULL);
-  pthread_cond_init(&cond, NULL);
-  busy_threads = (int*)calloc(N_threads, sizeof(int));
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  /* Initialize the pthreads */
+  //threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
   
   /* Read file */
-  double *data = (double*)malloc(N*5*sizeof(double));
+  data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
   
-  /* Allocate memory for trees and build the first tree */
-  node_t *tree = NULL;
-  node_t *new_tree = NULL;
-  node_t *temp = (node_t*)malloc(sizeof(node_t));
-  for (int i = 0; i < N; i++) {
-    insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
-           data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
-  }
+  /* Build the first tree */
+  tree = NULL;
   
   /* Setup graphics */
-  const int windowWidth = 600;
+  const int windowWidth = 800;
   const float L = 1;
   const float W = 1;
   const float radius = 0.002*L;
@@ -419,49 +363,42 @@ int main(int argc, char *argv[]) {
   
   /* Loop over time */
   for (int k = 0; k < nsteps; k++) {
-    /* Build the new tree by computing the new positions and velocities */
-    update_tree(tree, tree, &new_tree);
     
-    /* Wait for all threads to finish */
-    for (int i = 0; i < N_threads; i++) {
-      pthread_join(threads[i], NULL);
+    // Build tree
+    for (int i = 0; i < N; i++) {
+      insert(&tree, 0.5, 0.5, 100, data[5*i], data[5*i + 1],
+             data[5*i + 2], data[5*i + 3], data[5*i + 4], i);
     }
     
-    /* Clear the old tree */
-    free_tree(&tree);
-    tree = NULL;
+    // Update particles (using force_function)
+    update_array();
     
-    /* Copy the new tree into the old tree */
-    temp = new_tree;
-    new_tree = tree;
-    tree = temp;
     
-    /* Do graphics */
+    // Do graphics
     if (graphics) {
       ClearScreen();
       do_graphics(tree, L, W, radius, circleColor);
       Refresh();
       usleep(10);
     }
-  }
+    
+    // Free the tree
+    free_tree(&tree);
+    tree = NULL;
+  } //*/
   
-  /* Close graphics */
+  // Close graphics
   if (graphics) {
     FlushDisplay();
     CloseDisplay();
   }
    
-  /* Write result file */
-  write_tree(tree, &data);
+  // Write result file
   write_doubles_to_file(N*5, data, "result.gal");
   
-  /* Free memory */
-	free_tree(&tree);
+  // Free memory
 	free(data);
-  free(threads);
-  free(busy_threads);
-  pthread_mutex_destroy(&mutex);
-  pthread_cond_destroy(&cond);
+  //free(threads);
   
   return 0;
 }
