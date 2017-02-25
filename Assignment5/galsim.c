@@ -360,7 +360,11 @@ int main(int argc, char *argv[]) {
   
   // Free memory
 	free(data);
-  //free(threads);
+  free(threads);
+  for (int i = 0; i < N_threads; i++) {
+    free(args[i]);
+  }
+  free(args);
   
   return 0;
 }
