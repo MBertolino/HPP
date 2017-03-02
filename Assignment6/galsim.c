@@ -17,7 +17,7 @@
 #include <math.h>
 #include <unistd.h> // Sleep function
 #include <sys/time.h>
-#include <pthread.h>
+#include <omp.h>
 #include "structs.h"
 
 
@@ -30,8 +30,6 @@ const double epsilon = 0.001;
 double* data;
 node_t* tree;
 int N_threads;
-pthread_t* threads;
-arg_t** args;
 
 
 /* Timings */
@@ -172,24 +170,24 @@ void force_function(node_t *tree, double x, double y, double m,
 } //*/
 
 
-/* The thread function to comptue the force some particles */
-void* thread_func(void *arg) {
-	arg_t *thread_arg = (arg_t*)arg;
-	int from = thread_arg->from;
-	int to = thread_arg->to;
+/* Update the array of particles using the tree */
+void update_array() {
   
-  // Loop through the particles
-  for (int i = from; i <= to; i++) {
+  double force_x, force_y, vx, vy;
+  
+  // Loop through each particle
+  #pragma omp parallel for num_threads(N_threads) schedule(dynamic, 10)
+  for (int i = 0; i < N; i++) {
     
     // Compute the force
-	  double force_x = 0;
-	  double force_y = 0;
+	  force_x = 0;
+	  force_y = 0;
 	  force_function(tree, data[5*i], data[5*i + 1], data[5*i + 2], data[5*i + 3],
                    data[5*i + 4], &force_x, &force_y);
     
     // Calculate velocities
-	  double vx = data[5*i + 3] - G*force_x*delta_t;
-	  double vy = data[5*i + 4] - G*force_y*delta_t;
+	  vx = data[5*i + 3] - G*force_x*delta_t;
+	  vy = data[5*i + 4] - G*force_y*delta_t;
   	
     // Update values
     data[5*i] += delta_t*vx;
@@ -198,21 +196,6 @@ void* thread_func(void *arg) {
     data[5*i + 4] = vy;
   }
   
-	return NULL;
-} //*/
-
-
-/* Update the array of particles using the tree */
-void update_array() {
-  // Create the threads
-  for (int i = 0; i < N_threads; i++) {
-    pthread_create(&threads[i], NULL, thread_func, args[i]);
-  }
-  
-  // Wait for the threads to finish
-  for (int i = 0; i < N_threads; i++) {
-    pthread_join(threads[i], NULL);
-  }
 } //*/
 
 
@@ -295,17 +278,6 @@ int main(int argc, char *argv[]) {
   // Gravitational constant
   G = 100/(double)N;
   
-  // Allocate thread variables
-  threads = (pthread_t*)malloc(N_threads*sizeof(pthread_t));
-  args = (arg_t**)malloc(N_threads*sizeof(arg_t*));
-  
-  // Set thread indicies
-  for (int i = 0; i < N_threads; i++) {
-    args[i] = (arg_t*)malloc(sizeof(arg_t));
-    (args[i])->from = i*N/N_threads;
-    (args[i])->to = (i+1)*N/N_threads - 1;
-  }
-  
   // Read file
   data = (double*)malloc(N*5*sizeof(double));
   read_doubles_from_file(N*5, data, filename);
@@ -360,11 +332,6 @@ int main(int argc, char *argv[]) {
   
   // Free memory
 	free(data);
-  free(threads);
-  for (int i = 0; i < N_threads; i++) {
-    free(args[i]);
-  }
-  free(args);
   
   return 0;
 }
