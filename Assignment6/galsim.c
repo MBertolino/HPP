@@ -173,27 +173,31 @@ void force_function(node_t *tree, double x, double y, double m,
 /* Update the array of particles using the tree */
 void update_array() {
   
-  double force_x, force_y, vx, vy;
+  #pragma omp parallel num_threads(N_threads)
+  {
+ 		double force_x, force_y, vx, vy;
   
-  // Loop through each particle
-  #pragma omp parallel for num_threads(N_threads) schedule(dynamic, 10)
-  for (int i = 0; i < N; i++) {
+  	// Loop through each particle
+  	#pragma omp for schedule(dynamic, 10)
+ 		for (int i = 0; i < N; i++) {
+ 	   
+ 	 		// Compute the force
+			force_x = 0;
+			force_y = 0;
+			force_function(tree, data[5*i], data[5*i + 1], data[5*i + 2], data[5*i + 3],
+ 	  	                data[5*i + 4], &force_x, &force_y);
     
-    // Compute the force
-	  force_x = 0;
-	  force_y = 0;
-	  force_function(tree, data[5*i], data[5*i + 1], data[5*i + 2], data[5*i + 3],
-                   data[5*i + 4], &force_x, &force_y);
-    
-    // Calculate velocities
-	  vx = data[5*i + 3] - G*force_x*delta_t;
-	  vy = data[5*i + 4] - G*force_y*delta_t;
+ 	  	// Calculate velocities
+			vx = data[5*i + 3] - G*force_x*delta_t;
+			vy = data[5*i + 4] - G*force_y*delta_t;
   	
-    // Update values
-    data[5*i] += delta_t*vx;
-    data[5*i + 1] += delta_t*vy;
-    data[5*i + 3] = vx;
-    data[5*i + 4] = vy;
+ 	   	// Update values
+ 	   	data[5*i] += delta_t*vx;
+ 	  	data[5*i + 1] += delta_t*vy;
+ 	   	data[5*i + 3] = vx;
+ 	   	data[5*i + 4] = vy;
+  	}
+  
   }
   
 } //*/
